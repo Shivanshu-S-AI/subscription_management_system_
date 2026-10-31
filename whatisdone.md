@@ -518,6 +518,15 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 16: Vercel Hosting Preparation & Environment Configuration
+- **Vercel Deployment Readiness:**
+  - Confirmed 100% Next.js 15 App Router compatibility with zero custom server dependencies.
+  - Verified static generation and server-side dynamic rendering for all 61 production routes (`npm run build`).
+  - Created [`.env.example`](file:///Users/shiv/Odoo_hackathon_project/.env.example) documenting required Supabase connection parameters (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`).
+  - Added comprehensive step-by-step instructions for hosting via GitHub integration and Vercel CLI.
+
+---
+
 ## 3. Current Repository State
 
 - **Branch:** `main`
