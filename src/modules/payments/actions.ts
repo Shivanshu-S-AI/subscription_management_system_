@@ -33,6 +33,10 @@ export async function recordPaymentAction(formData: FormData) {
   revalidatePath("/staff/invoices");
   revalidatePath(`/staff/invoices/${invoice_id}`);
   revalidatePath("/staff");
+  revalidatePath("/portal");
+  revalidatePath("/portal/invoices");
+  revalidatePath(`/portal/invoices/${invoice_id}`);
+  revalidatePath("/portal/account");
 
   if (workspace === "staff") {
     redirect(`/staff/invoices/${invoice_id}`);

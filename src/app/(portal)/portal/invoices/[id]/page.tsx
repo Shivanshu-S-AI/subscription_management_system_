@@ -293,3 +293,4 @@ export default async function CustomerInvoiceDetailPage({
     </div>
   );
 }
+

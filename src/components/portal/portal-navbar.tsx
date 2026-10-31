@@ -153,3 +153,4 @@ export function PortalNavbar({ userEmail, customerName }: PortalNavbarProps) {
     </header>
   );
 }
+

@@ -10,7 +10,7 @@ export async function runBillingAction() {
     throw new Error("Unauthorized: Only administrators can trigger recurring billing runs.");
   }
 
-  runRecurringBilling();
+  runRecurringBilling({ forceAll: true });
   revalidatePath("/admin/billing");
   revalidatePath("/admin/invoices");
   revalidatePath("/admin/subscriptions");
@@ -18,4 +18,7 @@ export async function runBillingAction() {
   revalidatePath("/staff/invoices");
   revalidatePath("/staff/subscriptions");
   revalidatePath("/staff");
+  revalidatePath("/portal");
+  revalidatePath("/portal/invoices");
+  revalidatePath("/portal/subscriptions");
 }

@@ -1011,6 +1011,90 @@ export function updateDiscount(id: string, data: Partial<DiscountRule>): Discoun
   return store.discounts[idx];
 }
 
+/**
+ * Evaluates whether a discount rule applies to a given commercial transaction context
+ * and calculates the exact discount amount using 2-decimal rounded arithmetic.
+ */
+export function evaluateDiscountRule(
+  discount: DiscountRule,
+  context: {
+    subtotal: number;
+    totalQuantity: number;
+    productIds?: string[];
+    currentDate?: string;
+  }
+): {
+  eligible: boolean;
+  reason?: string;
+  discountAmount: number;
+} {
+  const today = context.currentDate || new Date().toISOString().split("T")[0];
+
+  // 1. Check active status
+  if (!discount.is_active) {
+    return { eligible: false, reason: "Discount rule is inactive.", discountAmount: 0 };
+  }
+
+  // 2. Check date window
+  if (discount.start_date && discount.start_date > today) {
+    return { eligible: false, reason: "Discount rule is not yet valid.", discountAmount: 0 };
+  }
+  if (discount.end_date && discount.end_date < today) {
+    return { eligible: false, reason: "Discount rule has expired.", discountAmount: 0 };
+  }
+
+  // 3. Check usage limit
+  if (discount.usage_limit && discount.times_used >= discount.usage_limit) {
+    return { eligible: false, reason: "Discount usage limit has been reached.", discountAmount: 0 };
+  }
+
+  // 4. Check minimum purchase amount
+  if (discount.min_purchase_amount && context.subtotal < discount.min_purchase_amount) {
+    return {
+      eligible: false,
+      reason: `Minimum purchase amount of $${discount.min_purchase_amount} required (current: $${context.subtotal}).`,
+      discountAmount: 0,
+    };
+  }
+
+  // 5. Check minimum quantity
+  if (discount.min_quantity && context.totalQuantity < discount.min_quantity) {
+    return {
+      eligible: false,
+      reason: `Minimum quantity of ${discount.min_quantity} required (current: ${context.totalQuantity}).`,
+      discountAmount: 0,
+    };
+  }
+
+  // 6. Check product applicability
+  if (discount.applies_to === "specific_products" && discount.product_id) {
+    const hasProduct = context.productIds?.includes(discount.product_id);
+    if (!hasProduct) {
+      return {
+        eligible: false,
+        reason: "Discount applies only to specific products not present in this order.",
+        discountAmount: 0,
+      };
+    }
+  }
+
+  // 7. Calculate discount amount
+  let discountAmount = 0;
+  if (discount.discount_type === "percentage") {
+    discountAmount = (context.subtotal * discount.discount_value) / 100;
+  } else if (discount.discount_type === "fixed") {
+    discountAmount = Math.min(context.subtotal, discount.discount_value);
+  }
+
+  // Round to 2 decimal places using reliable arithmetic
+  discountAmount = Math.round(discountAmount * 100) / 100;
+
+  return {
+    eligible: true,
+    discountAmount,
+  };
+}
+
 // --- Quotation Templates Operations ---
 export function getQuotationTemplates(): QuotationTemplate[] {
   return getStore().templates;
@@ -1083,6 +1167,7 @@ export function createQuotation(data: {
   customer_id: string;
   plan_id: string;
   template_id?: string;
+  discount_id?: string;
   validity_days?: number;
   notes?: string;
   lines: {
@@ -1101,46 +1186,109 @@ export function createQuotation(data: {
   const validUntilDate = new Date();
   validUntilDate.setDate(validUntilDate.getDate() + validityDays);
 
-  let subtotal = 0;
-  let tax_amount = 0;
+  let rawSubtotal = 0;
+  let totalQty = 0;
+  const productIds: string[] = [];
 
-  const lines: QuotationLine[] = data.lines.map((item, idx) => {
+  const rawLines = data.lines.map((item, idx) => {
     const product = store.products.find((p) => p.id === item.product_id);
     const variant = product?.variants.find((v) => v.id === item.variant_id);
 
     const unit_price = product?.sales_price || 0;
     const variant_adjustment = variant?.price_adjustment || 0;
-    const qty = Number(item.quantity) || 1;
+    const qty = Math.max(1, Number(item.quantity) || 1);
     const baseAmount = (unit_price + variant_adjustment) * qty;
 
-    const tax_rate = item.tax_rate !== undefined ? item.tax_rate : 10.0;
-    const taxAmt = baseAmount * (tax_rate / 100);
-    const lineTotal = baseAmount + taxAmt;
-
-    subtotal += baseAmount;
-    tax_amount += taxAmt;
+    rawSubtotal += baseAmount;
+    totalQty += qty;
+    if (item.product_id) productIds.push(item.product_id);
 
     const desc = variant
       ? `${product?.name || "Product"} (${variant.name})`
       : product?.name || "Product";
 
     return {
-      id: `ql-${Date.now()}-${idx}`,
-      quotation_id: quoteId,
-      product_id: item.product_id,
-      variant_id: item.variant_id,
-      description: desc,
-      quantity: qty,
+      idx,
+      item,
+      desc,
       unit_price,
       variant_adjustment,
+      qty,
+      baseAmount,
+    };
+  });
+
+  // Evaluate applicable discount rule if specified or eligible
+  let calculatedDiscount = 0;
+  let appliedDiscountRule: DiscountRule | null = null;
+
+  if (data.discount_id) {
+    appliedDiscountRule =
+      store.discounts.find(
+        (d) => d.id === data.discount_id || d.code.toUpperCase() === data.discount_id?.toUpperCase()
+      ) || null;
+  } else {
+    // Auto-detect best eligible discount
+    for (const d of store.discounts) {
+      const evalResult = evaluateDiscountRule(d, {
+        subtotal: rawSubtotal,
+        totalQuantity: totalQty,
+        productIds,
+      });
+      if (evalResult.eligible && evalResult.discountAmount > calculatedDiscount) {
+        calculatedDiscount = evalResult.discountAmount;
+        appliedDiscountRule = d;
+      }
+    }
+  }
+
+  if (appliedDiscountRule && calculatedDiscount === 0) {
+    const evalResult = evaluateDiscountRule(appliedDiscountRule, {
+      subtotal: rawSubtotal,
+      totalQuantity: totalQty,
+      productIds,
+    });
+    if (evalResult.eligible) {
+      calculatedDiscount = evalResult.discountAmount;
+      appliedDiscountRule.times_used += 1;
+    }
+  }
+
+  // Calculate taxes on discounted subtotal
+  let totalTax = 0;
+  const lines: QuotationLine[] = rawLines.map((rl) => {
+    // Proportional discount distribution
+    const lineDiscount =
+      rawSubtotal > 0
+        ? Math.round(((rl.baseAmount / rawSubtotal) * calculatedDiscount) * 100) / 100
+        : 0;
+    const taxableAmount = Math.max(0, rl.baseAmount - lineDiscount);
+    const tax_rate = rl.item.tax_rate !== undefined ? rl.item.tax_rate : 10.0;
+    const taxAmt = Math.round((taxableAmount * (tax_rate / 100)) * 100) / 100;
+    const lineTotal = Math.round((taxableAmount + taxAmt) * 100) / 100;
+
+    totalTax += taxAmt;
+
+    return {
+      id: `ql-${Date.now()}-${rl.idx}`,
+      quotation_id: quoteId,
+      product_id: rl.item.product_id,
+      variant_id: rl.item.variant_id,
+      description: rl.desc,
+      quantity: rl.qty,
+      unit_price: rl.unit_price,
+      variant_adjustment: rl.variant_adjustment,
       tax_rate,
       tax_amount: taxAmt,
-      discount_amount: 0,
+      discount_amount: lineDiscount,
       line_total: lineTotal,
     };
   });
 
-  const total_amount = subtotal + tax_amount;
+  const finalSubtotal = Math.round(rawSubtotal * 100) / 100;
+  const finalDiscount = Math.round(calculatedDiscount * 100) / 100;
+  const finalTax = Math.round(totalTax * 100) / 100;
+  const total_amount = Math.round((finalSubtotal - finalDiscount + finalTax) * 100) / 100;
 
   const newQuote: Quotation = {
     id: quoteId,
@@ -1151,9 +1299,9 @@ export function createQuotation(data: {
     status: "draft",
     valid_until: validUntilDate.toISOString().split("T")[0],
     notes: data.notes || "",
-    subtotal,
-    tax_amount,
-    discount_amount: 0,
+    subtotal: finalSubtotal,
+    tax_amount: finalTax,
+    discount_amount: finalDiscount,
     total_amount,
     lines,
     created_at: new Date().toISOString(),
@@ -1169,12 +1317,30 @@ export function convertQuotationToSubscription(quoteId: string): Subscription | 
   const quote = store.quotations.find((q) => q.id === quoteId);
   if (!quote) return null;
 
+  // 1. Idempotency Check: if already converted, return existing subscription
+  if (quote.status === "converted") {
+    const existing = store.subscriptions.find((s) => s.quotation_id === quote.id);
+    if (existing) return existing;
+  }
+
+  // 2. Expiration Check: reject expired quotations
+  const today = new Date().toISOString().split("T")[0];
+  if (quote.status === "expired" || (quote.valid_until && quote.valid_until < today)) {
+    quote.status = "expired";
+    quote.updated_at = new Date().toISOString();
+    return null; // Cannot convert expired quotation
+  }
+
+  // 3. Status Check: only valid unexpired quotes can be converted
+  if (quote.status !== "draft" && quote.status !== "sent") {
+    return null;
+  }
+
   const plan = store.plans.find((p) => p.id === quote.plan_id);
   const subId = `sub-${Date.now()}`;
   const count = store.subscriptions.length + 1;
   const subNumber = `SUB-2026-${String(count).padStart(3, "0")}`;
 
-  const today = new Date().toISOString().split("T")[0];
   const nextMonth = new Date();
   nextMonth.setMonth(nextMonth.getMonth() + 1);
   const nextBilling = nextMonth.toISOString().split("T")[0];
@@ -1358,6 +1524,11 @@ export function updateSubscriptionStatus(
   const sub = store.subscriptions.find((s) => s.id === id);
   if (!sub) return { success: false, error: "Subscription not found." };
 
+  // Terminal state check: Closed subscriptions cannot be modified
+  if (sub.status === "closed") {
+    return { success: false, error: "Closed subscriptions cannot be reopened or modified." };
+  }
+
   const plan = store.plans.find((p) => p.id === sub.plan_id);
 
   // Validate allowed transitions based on plan policies & lifecycle
@@ -1370,8 +1541,16 @@ export function updateSubscriptionStatus(
     }
   }
 
+  if (newStatus === "active") {
+    if (sub.status !== "confirmed" && sub.status !== "paused" && sub.status !== "draft") {
+      return { success: false, error: `Cannot activate subscription from '${sub.status}' state.` };
+    }
+  }
+
   if (newStatus === "closed") {
-    if (!sub.early_close_eligible && (!plan || !plan.early_close_eligible)) {
+    const today = new Date().toISOString().split("T")[0];
+    const isPastExpiry = sub.expiry_date && sub.expiry_date <= today;
+    if (!isPastExpiry && !sub.early_close_eligible && (!plan || !plan.early_close_eligible)) {
       return { success: false, error: "Early closure is not permitted under this plan contract." };
     }
   }
@@ -1433,11 +1612,33 @@ export function updateInvoiceStatus(
   const inv = store.invoices.find((i) => i.id === id);
   if (!inv) return { success: false, error: "Invoice not found." };
 
-  inv.status = newStatus;
-  if (newStatus === "paid") {
-    inv.amount_paid = inv.total_amount;
-    inv.amount_due = 0;
+  if (inv.status === "cancelled") {
+    return { success: false, error: "Cancelled invoices cannot be altered." };
   }
+
+  if (newStatus === "paid") {
+    return {
+      success: false,
+      error: "Invoices can only transition to Paid via recorded payment transactions.",
+    };
+  }
+
+  if (newStatus === "cancelled") {
+    if (inv.status === "paid" || inv.amount_paid > 0) {
+      return {
+        success: false,
+        error: "Cannot cancel an invoice with recorded payments. Please void or refund first.",
+      };
+    }
+  }
+
+  if (newStatus === "confirmed") {
+    if (inv.status !== "draft") {
+      return { success: false, error: "Only draft invoices can be confirmed." };
+    }
+  }
+
+  inv.status = newStatus;
   inv.updated_at = new Date().toISOString();
   return { success: true, invoice: inv };
 }
@@ -1446,31 +1647,59 @@ export function updateInvoiceStatus(
  * Idempotent Recurring Billing Process
  * Scans active subscriptions due for billing and generates invoices without duplicates or missed periods.
  */
-export function runRecurringBilling(): {
+export function runRecurringBilling(options?: {
+  forceAll?: boolean;
+  currentDate?: string;
+}): {
   processedCount: number;
   invoicesCreated: number;
   skippedDuplicates: number;
+  closedExpiredCount: number;
   createdInvoices: Invoice[];
 } {
   const store = getStore();
-  const today = new Date().toISOString().split("T")[0];
-
-  // Subscriptions eligible for billing: active with next_billing_date <= today (or upcoming within 3 days)
-  const eligibleSubs = store.subscriptions.filter(
-    (s) => s.status === "active"
-  );
+  const today = options?.currentDate || new Date().toISOString().split("T")[0];
 
   let processedCount = 0;
   let invoicesCreated = 0;
   let skippedDuplicates = 0;
+  let closedExpiredCount = 0;
   const createdInvoices: Invoice[] = [];
+
+  // 1. Process auto-close on expired subscriptions
+  for (const s of store.subscriptions) {
+    if (s.status === "active" && s.auto_close && s.expiry_date && s.expiry_date <= today) {
+      s.status = "closed";
+      s.updated_at = new Date().toISOString();
+      closedExpiredCount++;
+    }
+  }
+
+  // 2. Identify active subscriptions due for billing
+  const eligibleSubs = store.subscriptions.filter((s) => {
+    if (s.status !== "active") return false;
+    if (options?.forceAll) return true;
+    return s.next_billing_date <= today;
+  });
 
   for (const sub of eligibleSubs) {
     processedCount++;
 
     // Calculate billing period
-    const periodStart = sub.start_date;
     const periodEnd = sub.next_billing_date;
+
+    const prevDate = new Date(periodEnd);
+    if (sub.billing_frequency === "monthly") {
+      prevDate.setMonth(prevDate.getMonth() - 1);
+    } else if (sub.billing_frequency === "yearly") {
+      prevDate.setFullYear(prevDate.getFullYear() - 1);
+    } else if (sub.billing_frequency === "weekly") {
+      prevDate.setDate(prevDate.getDate() - 7);
+    } else if (sub.billing_frequency === "daily") {
+      prevDate.setDate(prevDate.getDate() - 1);
+    }
+    const computedStart = prevDate.toISOString().split("T")[0];
+    const periodStart = computedStart < sub.start_date ? sub.start_date : computedStart;
 
     // Strict Idempotency Check:
     // "Running the billing process multiple times for the same subscription and billing period must never create duplicate invoices."
@@ -1492,11 +1721,12 @@ export function runRecurringBilling(): {
 
     // Calculate due date based on payment terms
     let termDays = 15;
-    if (sub.payment_terms.includes("30")) termDays = 30;
-    else if (sub.payment_terms.includes("receipt")) termDays = 0;
-    else if (sub.payment_terms.includes("7")) termDays = 7;
+    if (sub.payment_terms?.includes("30")) termDays = 30;
+    else if (sub.payment_terms?.includes("60")) termDays = 60;
+    else if (sub.payment_terms?.includes("receipt")) termDays = 0;
+    else if (sub.payment_terms?.includes("7")) termDays = 7;
 
-    const dueDateObj = new Date();
+    const dueDateObj = new Date(today);
     dueDateObj.setDate(dueDateObj.getDate() + termDays);
     const dueDate = dueDateObj.toISOString().split("T")[0];
 
@@ -1561,6 +1791,7 @@ export function runRecurringBilling(): {
     processedCount,
     invoicesCreated,
     skippedDuplicates,
+    closedExpiredCount,
     createdInvoices,
   };
 }
@@ -1594,7 +1825,19 @@ export function recordPayment(data: {
   const invoice = store.invoices.find((i) => i.id === data.invoice_id);
   if (!invoice) return { success: false, error: "Selected invoice not found." };
 
-  const amount = Number(data.amount);
+  if (invoice.status === "cancelled") {
+    return { success: false, error: "Cannot record payments against a cancelled invoice." };
+  }
+
+  if (invoice.status === "draft") {
+    return { success: false, error: "Invoice must be confirmed before recording payments." };
+  }
+
+  if (invoice.status === "paid" || invoice.amount_due <= 0) {
+    return { success: false, error: "Invoice is already paid in full." };
+  }
+
+  const amount = Math.round(Number(data.amount) * 100) / 100;
   if (isNaN(amount) || amount <= 0) {
     return { success: false, error: "Please enter a valid positive payment amount." };
   }
@@ -1622,11 +1865,14 @@ export function recordPayment(data: {
     created_at: new Date().toISOString(),
   };
 
-  // Update invoice balance
-  invoice.amount_paid += amount;
-  invoice.amount_due = Math.max(0, invoice.total_amount - invoice.amount_paid);
+  // Update invoice balance with safe decimal arithmetic
+  const newAmountPaid = Math.round((invoice.amount_paid + amount) * 100) / 100;
+  const newAmountDue = Math.max(0, Math.round((invoice.total_amount - newAmountPaid) * 100) / 100);
 
-  if (invoice.amount_due === 0) {
+  invoice.amount_paid = newAmountPaid;
+  invoice.amount_due = newAmountDue;
+
+  if (newAmountDue === 0) {
     invoice.status = "paid";
   }
   invoice.updated_at = new Date().toISOString();
@@ -1904,7 +2150,11 @@ export function getCustomerSubscriptionById(customerId: string, subscriptionId: 
   if (!sub || sub.customer_id !== customerId) {
     return null; // Strict isolation: return null if not owned by customer
   }
-  return sub;
+  return {
+    ...sub,
+    customer: store.customers.find((c) => c.id === sub.customer_id),
+    plan: store.plans.find((p) => p.id === sub.plan_id),
+  };
 }
 
 /**
@@ -1937,7 +2187,12 @@ export function getCustomerInvoiceById(customerId: string, invoiceId: string): I
   if (!inv || inv.customer_id !== customerId) {
     return null; // Strict isolation: return null if not owned by customer
   }
-  return inv;
+  return {
+    ...inv,
+    customer: store.customers.find((c) => c.id === inv.customer_id),
+    subscription: store.subscriptions.find((s) => s.id === inv.subscription_id),
+    payments: store.payments.filter((p) => p.invoice_id === inv.id),
+  };
 }
 
 /**
@@ -1946,12 +2201,17 @@ export function getCustomerInvoiceById(customerId: string, invoiceId: string): I
 export function customerPauseSubscription(customerId: string, subscriptionId: string) {
   const sub = getCustomerSubscriptionById(customerId, subscriptionId);
   if (!sub) return { success: false, error: "Subscription not found or not owned by customer." };
-  if (!sub.plan?.pause_eligible) return { success: false, error: "Plan policy does not permit pausing." };
+  const canPause = sub.pause_eligible || sub.plan?.pause_eligible;
+  if (!canPause) return { success: false, error: "Plan policy does not permit pausing." };
   if (sub.status !== "active") return { success: false, error: "Only active subscriptions can be paused." };
 
-  sub.status = "paused";
-  sub.updated_at = new Date().toISOString();
-  return { success: true, subscription: sub };
+  const store = getStore();
+  const realSub = store.subscriptions.find((s) => s.id === subscriptionId);
+  if (realSub) {
+    realSub.status = "paused";
+    realSub.updated_at = new Date().toISOString();
+  }
+  return { success: true, subscription: realSub || sub };
 }
 
 /**
@@ -1962,9 +2222,13 @@ export function customerResumeSubscription(customerId: string, subscriptionId: s
   if (!sub) return { success: false, error: "Subscription not found or not owned by customer." };
   if (sub.status !== "paused") return { success: false, error: "Subscription is not paused." };
 
-  sub.status = "active";
-  sub.updated_at = new Date().toISOString();
-  return { success: true, subscription: sub };
+  const store = getStore();
+  const realSub = store.subscriptions.find((s) => s.id === subscriptionId);
+  if (realSub) {
+    realSub.status = "active";
+    realSub.updated_at = new Date().toISOString();
+  }
+  return { success: true, subscription: realSub || sub };
 }
 
 /**
@@ -1973,11 +2237,27 @@ export function customerResumeSubscription(customerId: string, subscriptionId: s
 export function customerRenewSubscription(customerId: string, subscriptionId: string) {
   const sub = getCustomerSubscriptionById(customerId, subscriptionId);
   if (!sub) return { success: false, error: "Subscription not found or not owned by customer." };
-  if (!sub.plan?.renewal_eligible) return { success: false, error: "Plan is not eligible for self-renewal." };
+  const canRenew = sub.renewal_eligible || sub.plan?.renewal_eligible;
+  if (!canRenew) return { success: false, error: "Plan is not eligible for self-renewal." };
 
-  sub.status = "active";
-  sub.updated_at = new Date().toISOString();
-  return { success: true, subscription: sub };
+  const store = getStore();
+  const realSub = store.subscriptions.find((s) => s.id === subscriptionId);
+  if (realSub) {
+    const nextDate = new Date(realSub.next_billing_date || new Date());
+    if (realSub.billing_frequency === "monthly") {
+      nextDate.setMonth(nextDate.getMonth() + 1);
+    } else if (realSub.billing_frequency === "yearly") {
+      nextDate.setFullYear(nextDate.getFullYear() + 1);
+    } else if (realSub.billing_frequency === "weekly") {
+      nextDate.setDate(nextDate.getDate() + 7);
+    } else {
+      nextDate.setDate(nextDate.getDate() + 30);
+    }
+    realSub.next_billing_date = nextDate.toISOString().split("T")[0];
+    realSub.status = "active";
+    realSub.updated_at = new Date().toISOString();
+  }
+  return { success: true, subscription: realSub || sub };
 }
 
 

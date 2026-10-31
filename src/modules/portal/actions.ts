@@ -65,3 +65,4 @@ export async function customerRenewAction(subscriptionId: string): Promise<void>
   revalidatePath("/admin/subscriptions");
   revalidatePath("/staff/subscriptions");
 }
+

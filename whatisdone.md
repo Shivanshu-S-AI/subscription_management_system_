@@ -310,10 +310,61 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 8: Phase 4 — Cross-System Integration & Baseline QA
+- **Objective:**
+  - Verify that the Admin workspace, Staff workspace, Customer Portal, backend feature modules, and Supabase database function together as a unified, coherent application.
+  - Complete end-to-end business workflow testing (Customer registration → Quotation → Subscription → Recurring Billing → Invoice → Payment → Customer Portal → Financial Reporting).
+  - Enforce data consistency, relationship integrity, and database-level RLS policies.
+  - Validate financial calculation precision and eliminate floating-point arithmetic errors.
+  - Eliminate duplicate billing risks with strict idempotency and lifecycle state machines.
+
+- **System Issues Identified & Resolved:**
+  1. **Quotation Conversion Idempotency & Expiration:**
+     - *Issue:* Repeated quotation conversion generated duplicate subscriptions for the same commercial quote, and expired quotes were convertible.
+     - *Fix:* Added idempotency check in `convertQuotationToSubscription` (returns existing subscription if already converted) and validates `valid_until >= today`, rejecting expired quotes.
+  2. **Automated Discount Rule Evaluation Engine:**
+     - *Issue:* Discounts were defined in the database/schema but had no evaluation logic in quotation generation or billing.
+     - *Fix:* Implemented `evaluateDiscountRule` validating `is_active`, validity windows (`start_date` / `end_date`), usage limits (`times_used < usage_limit`), minimum purchase amounts, minimum quantities, and product applicability for both percentage and fixed discounts.
+  3. **Recurring Billing Idempotency & Lifecycle Alignment:**
+     - *Issue:* Billing queried active subscriptions without verifying due dates (`next_billing_date <= today`), fixed `periodStart` to initial subscription start, and billed expired contracts.
+     - *Fix:* Updated `runRecurringBilling` to filter due subscriptions, auto-close expired contracts with `auto_close === true`, calculate progressive cycle periods, and enforce strict database unique constraint `uq_subscription_billing_period` preventing duplicate invoices.
+  4. **Strict Invoice Status Transitions & Accounting Invariant:**
+     - *Issue:* Invoices could transition to `paid` via direct status change without creating payment records, distorting revenue metrics. Also allowed cancelling paid invoices.
+     - *Fix:* Disallowed setting invoice status to `paid` directly; invoices only transition to `paid` via recorded payment transactions. Disallowed cancelling invoices with recorded payments. Enforced valid state machine transitions: `draft` → `confirmed` → `paid` (via payment) or `cancelled` (if unpaid).
+  5. **Payment Recording Validation on Ineligible Invoices:**
+     - *Issue:* Payments could be recorded against draft or cancelled invoices, or exceed remaining invoice balances.
+     - *Fix:* Rejected payments on cancelled or draft invoices, enforced `amount <= amount_due`, and used decimal-safe arithmetic (`Math.round(... * 100) / 100`) to prevent JavaScript floating point errors.
+  6. **Customer Portal Navigation & Sign-Out Routing:**
+     - *Issue:* Customer signing out from portal was routed to `/internal-login` instead of public `/login`.
+     - *Fix:* Updated `signOutAction` to inspect the user role and redirect customers to `/login` and internal staff/admin to `/internal-login`.
+  7. **Customer Portal Self-Service Actions & Plan Policy Checks:**
+     - *Issue:* `customerPauseSubscription` and `customerRenewSubscription` failed when underlying plan relations were not populated on raw subscription records.
+     - *Fix:* Refactored `getCustomerSubscriptionById` and `getCustomerInvoiceById` to populate plan and customer metadata while preserving strict isolation, and advanced `next_billing_date` upon self-service renewal.
+  8. **Customer Database-Level Security (PostgreSQL RLS):**
+     - Created `supabase/migrations/20261031_003_customer_portal_rls.sql` providing comprehensive Row Level Security policies for customers on products, plans, subscriptions, subscription lines, invoices, invoice lines, and payments.
+
+- **Automated QA & Test Suite (`tests/cross-system-integration.test.mjs`):**
+  - Configured native Node test runner (`npm test`) with 39 passing tests (0 failures, 83ms execution):
+    - **Scenario 1:** Customer registration password rules (length, upper, lower, special) & role destinations.
+    - **Scenario 2:** Admin catalog creation (software product, variants with +$560 adjustments, annual/monthly plans, tax rules, discount rules).
+    - **Scenario 3 & 4:** Staff quotation creation, discount evaluation, quotation conversion, conversion idempotency, expiration rejection, and subscription lifecycle state transitions.
+    - **Scenario 5:** Recurring billing invoice generation, critical duplicate billing test (running twice produces 0 duplicate invoices), and auto-close on expired contracts.
+    - **Scenario 6:** Invoice operations, draft confirmation, cancellation of unpaid invoices, and rejection of direct 'paid' transition without payment.
+    - **Scenario 7:** Payment recording (partial payments, excess rejection, full settlement to 'paid', rejection of payments on cancelled invoices).
+    - **Scenario 8:** Financial reporting KPI reconciliation (cash collected strictly matches payments, outstanding balance matches non-cancelled invoices, overdue counts).
+    - **Customer Portal:** Strict cross-customer data isolation (Customer A querying Customer B returns `null` / 404), policy-governed self-service pause/resume/renew.
+
+- **Automated Visual Verification via Chrome DevTools MCP:**
+  - Captured desktop (1440×900) screenshots across Admin Financial Reports (`/admin/reports`), Staff Quotations (`/staff/quotations`), and Customer Portal (`/portal`).
+  - Confirmed consistent Geist design tokens, clean typography, badge indicators, and zero hydration warnings.
+
+---
+
 ## 3. Current Repository State
 
 - **Branch:** `main`
 - **Total Compiled Routes:** 61 routes across Marketing, Auth, Admin, Staff, and Customer Portal.
+- **Automated Test Suite:** 39 tests passing with 0 failures (`npm test`).
 - **Working Tree:**
   - `src/app/(portal)/portal/`: Complete Phase 3 Customer Portal (Overview, Subscriptions, Invoices, Account, Print).
   - `src/components/portal/`: Customer navbar with mobile drawer and customer layout shell.
@@ -324,15 +375,21 @@ This document serves as the single tracking record for all past ("old") and curr
   - `src/components/admin/`: Admin sidebar, header with global search, and print controls.
   - `src/modules/`: Domain business logic actions (`products`, `plans`, `taxes`, `discounts`, `quotations`, `subscriptions`, `billing`, `invoices`, `payments`, `team`, `auth`, `portal`).
   - `src/lib/data/store.ts`: Domain models, seed data, calculation utilities, and business rule validators.
-  - `supabase/migrations/`: RBAC auth migration (`001`) and Complete Admin Workspace Schema migration (`002`).
+  - `supabase/migrations/`:
+    - `001_auth_profiles.sql` (RBAC & auth triggers).
+    - `002_admin_workspace_schema.sql` (Admin workspace schema, idempotency constraints & indexes).
+    - `003_customer_portal_rls.sql` (Customer Portal RLS policies for strict customer isolation).
+  - `tests/`:
+    - `auth-validation.test.mjs` (8 auth tests).
+    - `cross-system-integration.test.mjs` (31 cross-system integration and E2E workflow tests).
   - Documentation: `README.md`, `AGENTS.md`, `DESIGN.md`, `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_PLAN.md`, `whatisdone.md`.
 
 ---
 
-## 4. Next Implementation Steps (Phase 4 of Hackathon: Supabase Live Cloud Integration & Vercel Deployment)
+## 4. Next Implementation Steps (Phase 5 of Hackathon: Supabase Live Cloud Integration & Vercel Deployment)
 
 1. **Supabase Live Cloud Synchronization:**
-   - Run migrations on live Supabase cloud project.
+   - Run migrations `001`, `002`, and `003` on live Supabase cloud project.
    - Verify Supabase Auth email confirmation and password reset hooks with live SMTP.
 2. **End-to-End System Polish & Health Checks:**
    - Production bundle optimization.

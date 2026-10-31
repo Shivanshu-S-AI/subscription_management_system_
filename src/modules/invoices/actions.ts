@@ -15,6 +15,9 @@ export async function updateInvoiceStatusAction(
   revalidatePath("/staff/invoices");
   revalidatePath(`/staff/invoices/${invoiceId}`);
   revalidatePath("/staff");
+  revalidatePath("/portal");
+  revalidatePath("/portal/invoices");
+  revalidatePath(`/portal/invoices/${invoiceId}`);
 }
 
 export async function sendInvoiceAction(invoiceId: string): Promise<void> {
@@ -23,4 +26,7 @@ export async function sendInvoiceAction(invoiceId: string): Promise<void> {
   revalidatePath(`/admin/invoices/${invoiceId}`);
   revalidatePath("/staff/invoices");
   revalidatePath(`/staff/invoices/${invoiceId}`);
+  revalidatePath("/portal");
+  revalidatePath("/portal/invoices");
+  revalidatePath(`/portal/invoices/${invoiceId}`);
 }

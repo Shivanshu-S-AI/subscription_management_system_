@@ -316,6 +316,7 @@ export async function resetPasswordAction(
  */
 export async function signOutAction() {
   const cookieStore = await cookies();
+  const currentRole = cookieStore.get("brightloop_session_role")?.value;
   cookieStore.delete("brightloop_session_role");
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -328,5 +329,9 @@ export async function signOutAction() {
     }
   }
 
-  redirect("/internal-login");
+  if (currentRole === "customer") {
+    redirect("/login");
+  } else {
+    redirect("/internal-login");
+  }
 }
