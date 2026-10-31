@@ -7,7 +7,13 @@ import { Search, Menu, Shield, ArrowUpRight } from "lucide-react";
 import { globalSearch } from "@/lib/data/store";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-export function AdminHeader({ onMenuClick }: { onMenuClick?: () => void }) {
+export function AdminHeader({
+  onMenuClick,
+  isSidebarOpen = true,
+}: {
+  onMenuClick?: () => void;
+  isSidebarOpen?: boolean;
+}) {
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -37,11 +43,13 @@ export function AdminHeader({ onMenuClick }: { onMenuClick?: () => void }) {
 
   return (
     <header className="sticky top-0 z-30 flex h-14 w-full items-center justify-between border-b border-hairline bg-canvas/90 px-4 sm:px-6 backdrop-blur-md">
-      {/* Left: Mobile Toggle & Breadcrumbs */}
+      {/* Left: Burger Toggle & Breadcrumbs */}
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
-          className="flex h-8 w-8 items-center justify-center rounded-sm border border-hairline bg-canvas-elevated text-ink lg:hidden"
+          title={isSidebarOpen ? "Hide navigation menu" : "Show navigation menu"}
+          aria-label={isSidebarOpen ? "Hide navigation menu" : "Show navigation menu"}
+          className="flex h-8 w-8 items-center justify-center rounded-sm border border-hairline bg-canvas-elevated text-ink hover:bg-canvas hover:text-ink active:scale-95 transition-all shadow-whisper cursor-pointer"
         >
           <Menu className="h-4 w-4" />
         </button>

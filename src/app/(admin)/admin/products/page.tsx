@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Package, Plus, Search, Layers, Edit } from "lucide-react";
 import { getProducts } from "@/lib/data/store";
 import { formatCurrency } from "@/lib/utils";
 
@@ -13,119 +12,232 @@ export default async function ProductsPage({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-hairline pb-5">
+      {/* BEGIN: PageHeader */}
+      <div
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-2 gap-4"
+        data-purpose="page-headline"
+      >
         <div>
-          <span className="font-mono text-xs uppercase tracking-wider text-mute">
-            Catalog & Pricing
-          </span>
-          <h1 className="text-2xl font-semibold tracking-[-0.4px] text-ink mt-0.5">
-            Products & Variants
-          </h1>
-          <p className="text-xs text-body mt-1">
-            Software products, service offerings, and configurable brand variants.
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+            Catalog &amp; Pricing
           </p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
+            Products &amp; Variants
+          </h1>
         </div>
-
-        <Link
-          href="/admin/products/new"
-          className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-ink px-3 text-xs font-medium text-white shadow-whisper hover:bg-black transition-colors"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          <span>Add Product</span>
-        </Link>
+        <div className="flex items-center">
+          {/* Add Product Action */}
+          <Link
+            href="/admin/products/new"
+            className="inline-flex items-center gap-2 bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 text-white px-4 py-2.5 rounded-lg text-sm font-semibold shadow-sm hover:shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:ring-offset-2"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M12 4v16m8-8H4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2.2"
+              />
+            </svg>
+            <span>Add Product</span>
+          </Link>
+        </div>
       </div>
+      {/* END: PageHeader */}
 
-      {/* Search Bar */}
-      <form method="GET" className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-mute" />
+      {/* BEGIN: SearchFilterBar */}
+      <form
+        method="GET"
+        className="flex flex-col sm:flex-row gap-3"
+        data-purpose="product-search-filters"
+      >
+        <div className="relative flex-1">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M21 21l-4.35-4.35m1.85-5.65a7 7 0 11-14 0 7 7 0 0114 0z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              />
+            </svg>
+          </div>
           <input
             name="q"
             defaultValue={q || ""}
             placeholder="Search products by name or type..."
-            className="h-9 w-full rounded-sm border border-hairline bg-canvas-elevated pl-9 pr-3 text-xs text-ink placeholder:text-mute focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink transition-colors"
+            type="search"
+            className="block w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-900/15 dark:focus:ring-white/20 focus:border-slate-900 dark:focus:border-white shadow-xs transition-colors"
           />
         </div>
         <button
           type="submit"
-          className="h-9 rounded-sm bg-ink px-4 text-xs font-medium text-white hover:bg-black transition-colors"
+          className="bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 text-white px-6 py-2.5 rounded-lg text-sm font-semibold shadow-sm hover:shadow transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white focus:ring-offset-2 shrink-0"
         >
           Search
         </button>
       </form>
+      {/* END: SearchFilterBar */}
 
-      {/* Products Grid / Table */}
-      <div className="rounded-md border border-hairline bg-canvas-elevated shadow-whisper overflow-hidden">
+      {/* BEGIN: ProductsTableContainer */}
+      <div
+        className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden"
+        data-purpose="products-table"
+      >
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-canvas border-b border-hairline text-[11px] font-mono uppercase text-mute">
-              <tr>
-                <th className="px-5 py-3 font-medium">Product Name & Notes</th>
-                <th className="px-5 py-3 font-medium">Type</th>
-                <th className="px-5 py-3 font-medium">Sales Price</th>
-                <th className="px-5 py-3 font-medium">Cost Price</th>
-                <th className="px-5 py-3 font-medium">Variants</th>
-                <th className="px-5 py-3 font-medium text-right">Action</th>
+          <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-left">
+            {/* Table Column Headers */}
+            <thead>
+              <tr className="bg-slate-50/75 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                <th
+                  className="py-3.5 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+                  scope="col"
+                >
+                  Product Name &amp; Notes
+                </th>
+                <th
+                  className="py-3.5 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+                  scope="col"
+                >
+                  Type
+                </th>
+                <th
+                  className="py-3.5 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+                  scope="col"
+                >
+                  Sales Price
+                </th>
+                <th
+                  className="py-3.5 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+                  scope="col"
+                >
+                  Cost Price
+                </th>
+                <th
+                  className="py-3.5 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+                  scope="col"
+                >
+                  Variants
+                </th>
+                <th
+                  className="py-3.5 px-6 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right"
+                  scope="col"
+                >
+                  Action
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-hairline">
-              {products.map((p) => (
-                <tr key={p.id} className="hover:bg-canvas/50 transition-colors">
-                  <td className="px-5 py-4 max-w-xs">
-                    <span className="font-semibold text-ink text-sm block">
-                      {p.name}
-                    </span>
-                    <span className="text-xs text-mute line-clamp-1 mt-0.5">
-                      {p.notes || "No notes"}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className="rounded-xs bg-canvas px-2 py-0.5 font-mono text-[10px] uppercase border border-hairline text-ink">
-                      {p.type}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 font-semibold text-ink">
-                    {formatCurrency(p.sales_price)}
-                  </td>
-                  <td className="px-5 py-4 text-mute">
-                    {formatCurrency(p.cost_price)}
-                  </td>
-                  <td className="px-5 py-4">
-                    {p.variants.length === 0 ? (
-                      <span className="text-mute font-mono text-[11px]">No variants</span>
-                    ) : (
-                      <div className="space-y-1">
-                        {p.variants.map((v) => (
-                          <div
-                            key={v.id}
-                            className="flex items-center gap-1.5 text-[11px] font-mono"
-                          >
-                            <span className="text-ink font-medium">{v.name}:</span>
-                            <span className="text-emerald-600">
-                              +{formatCurrency(v.price_adjustment)}
-                            </span>
-                          </div>
-                        ))}
+            {/* Table Body Content */}
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900 text-sm">
+              {products.map((p) => {
+                const typeUpper = p.type?.toUpperCase() || "SOFTWARE";
+                const badgeColor =
+                  typeUpper === "SOFTWARE"
+                    ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200/60 dark:border-blue-800/60"
+                    : typeUpper === "ADDON"
+                    ? "bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200/60 dark:border-purple-800/60"
+                    : typeUpper === "SERVICE"
+                    ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/60 dark:border-amber-800/60"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700";
+
+                return (
+                  <tr
+                    key={p.id}
+                    className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors group"
+                  >
+                    {/* Name & Description */}
+                    <td className="py-4 px-6 align-top max-w-sm">
+                      <div className="font-semibold text-slate-900 dark:text-white">
+                        {p.name}
                       </div>
-                    )}
-                  </td>
-                  <td className="px-5 py-4 text-right">
-                    <Link
-                      href={`/admin/products/${p.id}`}
-                      className="inline-flex items-center gap-1 rounded-sm border border-hairline bg-canvas-elevated px-2.5 py-1 text-xs font-medium text-ink hover:bg-canvas transition-colors"
-                    >
-                      <Edit className="h-3 w-3 text-mute" />
-                      <span>Edit</span>
-                    </Link>
-                  </td>
-                </tr>
-              ))}
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                        {p.notes || "No notes"}
+                      </div>
+                    </td>
+                    {/* Product Type Badge */}
+                    <td className="py-4 px-6 align-top">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeColor}`}
+                      >
+                        {typeUpper}
+                      </span>
+                    </td>
+                    {/* Sales Price */}
+                    <td className="py-4 px-6 align-top">
+                      <span className="font-semibold text-slate-900 dark:text-white">
+                        {formatCurrency(p.sales_price)}
+                      </span>
+                    </td>
+                    {/* Cost Price */}
+                    <td className="py-4 px-6 align-top">
+                      <span className="text-sm text-slate-500 dark:text-slate-400">
+                        {formatCurrency(p.cost_price)}
+                      </span>
+                    </td>
+                    {/* Configurable Variants List */}
+                    <td className="py-4 px-6 align-top">
+                      {p.variants.length === 0 ? (
+                        <span className="text-xs text-slate-400 dark:text-slate-500">
+                          No variants
+                        </span>
+                      ) : (
+                        <div className="space-y-1.5 max-w-xs">
+                          {p.variants.map((v) => (
+                            <div
+                              key={v.id}
+                              className="flex items-center justify-between text-xs gap-3"
+                            >
+                              <span className="text-slate-700 dark:text-slate-300 font-medium truncate">
+                                {v.name}:
+                              </span>
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 font-mono">
+                                +{formatCurrency(v.price_adjustment)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </td>
+                    {/* Edit Action */}
+                    <td className="py-4 px-6 align-top text-right whitespace-nowrap">
+                      <Link
+                        href={`/admin/products/${p.id}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors shadow-2xs"
+                      >
+                        <svg
+                          className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                          />
+                        </svg>
+                        <span>Edit</span>
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
+      {/* END: ProductsTableContainer */}
     </div>
   );
 }
-

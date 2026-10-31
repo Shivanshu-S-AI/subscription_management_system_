@@ -81,13 +81,17 @@ const navGroups: NavGroup[] = [
 ];
 
 export function AdminSidebar({
-  isOpen,
+  isOpen = false,
   onClose,
+  isDesktopOpen = true,
+  onToggleDesktop,
   userName,
   userEmail,
 }: {
   isOpen?: boolean;
   onClose?: () => void;
+  isDesktopOpen?: boolean;
+  onToggleDesktop?: () => void;
   userName?: string;
   userEmail?: string;
 }) {
@@ -109,37 +113,45 @@ export function AdminSidebar({
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 flex w-64 flex-col border-r border-hairline bg-canvas transition-transform duration-200 lg:static lg:translate-x-0 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r border-hairline bg-canvas transition-all duration-300 ease-in-out lg:static ${
+          isOpen ? "translate-x-0 w-64" : "-translate-x-full lg:translate-x-0"
+        } ${
+          isDesktopOpen
+            ? "lg:w-64 lg:border-r lg:opacity-100"
+            : "lg:w-0 lg:border-r-0 lg:overflow-hidden lg:opacity-0 lg:pointer-events-none"
         }`}
       >
-        {/* Brand Header */}
-        <div className="flex h-14 items-center justify-between border-b border-hairline px-4">
-          <Link href="/admin" className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-ink text-white shadow-whisper">
-              <ShieldCheck className="h-4 w-4" />
-            </div>
-            <div>
-              <span className="font-sans text-xs font-semibold tracking-tight text-ink block">
+        <div className="w-64 flex flex-col h-full min-h-0 shrink-0">
+          {/* Brand Header */}
+          <div className="flex h-14 items-center justify-between border-b border-hairline px-4 shrink-0">
+            <Link href="/admin" className="flex items-center gap-2.5">
+              <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-ink text-white shadow-whisper">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
+              <span className="font-sans text-sm font-semibold tracking-tight text-ink block">
                 Brightloop
               </span>
-              <span className="font-mono text-[10px] uppercase text-mute tracking-wider block">
-                Admin Workspace
-              </span>
-            </div>
-          </Link>
+            </Link>
 
-          {/* Close button on mobile */}
-          <button
-            onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-sm border border-hairline bg-canvas-elevated text-mute hover:text-ink lg:hidden"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+            {/* Hide / Close navigation button */}
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined" && window.innerWidth < 1024) {
+                  onClose?.();
+                } else {
+                  onToggleDesktop?.();
+                }
+              }}
+              title="Hide navigation menu"
+              aria-label="Hide navigation menu"
+              className="flex h-7 w-7 items-center justify-center rounded-sm border border-hairline bg-canvas-elevated text-mute hover:text-ink transition-colors cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
 
-        {/* Navigation list */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+          {/* Navigation list */}
+          <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
           {navGroups.map((group, gIdx) => (
             <div key={gIdx}>
               {group.groupName && (
@@ -199,7 +211,8 @@ export function AdminSidebar({
             </div>
           </div>
         </div>
-      </aside>
+      </div>
+    </aside>
     </>
   );
 }

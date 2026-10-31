@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Percent, Plus, Check } from "lucide-react";
 import { getTaxRules } from "@/lib/data/store";
 
 export default function TaxesPage() {
@@ -7,68 +6,135 @@ export default function TaxesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-hairline pb-5">
-        <div>
-          <span className="font-mono text-xs uppercase tracking-wider text-mute">
-            Catalog & Pricing
-          </span>
-          <h1 className="text-2xl font-semibold tracking-[-0.4px] text-ink mt-0.5">
-            Tax Configuration
-          </h1>
-          <p className="text-xs text-body mt-1">
-            Admin-configured tax rules applied automatically to quote and invoice line items.
-          </p>
+      {/* BEGIN: PageHeader */}
+      <section
+        className="pb-2 border-b border-slate-200/80 dark:border-slate-800"
+        data-purpose="page-header"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-2">
+          <div>
+            {/* Eyebrow label */}
+            <p className="text-xs font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase mb-1">
+              Catalog &amp; Pricing
+            </p>
+            {/* Main title */}
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight">
+              Tax Configuration
+            </h1>
+          </div>
+          {/* Call to action button */}
+          <div className="shrink-0">
+            <Link
+              href="/admin/taxes/new"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 text-white text-sm font-semibold shadow-sm hover:shadow transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 dark:focus:ring-white cursor-pointer"
+            >
+              <svg
+                className="h-4 w-4 stroke-[2.5]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M12 4.5v15m7.5-7.5h-15"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span>New Tax Rule</span>
+            </Link>
+          </div>
         </div>
+      </section>
+      {/* END: PageHeader */}
 
-        <Link
-          href="/admin/taxes/new"
-          className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-ink px-3 text-xs font-medium text-white shadow-whisper hover:bg-black transition-colors"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          <span>New Tax Rule</span>
-        </Link>
-      </div>
-
-      {/* Taxes Table */}
-      <div className="rounded-md border border-hairline bg-canvas-elevated shadow-whisper overflow-hidden">
-        <table className="w-full text-left text-xs">
-          <thead className="bg-canvas border-b border-hairline text-[11px] font-mono uppercase text-mute">
-            <tr>
-              <th className="px-5 py-3 font-medium">Tax Rule Name</th>
-              <th className="px-5 py-3 font-medium">Rate (%)</th>
-              <th className="px-5 py-3 font-medium">Description</th>
-              <th className="px-5 py-3 font-medium">Default Rule</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-hairline">
-            {taxes.map((t) => (
-              <tr key={t.id} className="hover:bg-canvas/50 transition-colors">
-                <td className="px-5 py-4 font-semibold text-ink text-sm">
-                  {t.name}
-                </td>
-                <td className="px-5 py-4 font-mono font-semibold text-ink text-sm">
-                  {t.rate.toFixed(2)}%
-                </td>
-                <td className="px-5 py-4 text-mute max-w-sm">
-                  {t.description || "No description"}
-                </td>
-                <td className="px-5 py-4">
-                  {t.is_default ? (
-                    <span className="inline-flex items-center gap-1 rounded-xs bg-emerald-500/10 px-2 py-0.5 text-[10px] font-mono text-emerald-600 font-medium">
-                      <Check className="h-3 w-3" />
-                      Default System Tax
-                    </span>
-                  ) : (
-                    <span className="text-mute font-mono text-[11px]">—</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/* BEGIN: TaxRulesTableSection */}
+      <section
+        aria-labelledby="tax-rules-heading"
+        data-purpose="tax-table-container"
+      >
+        <h2 className="sr-only" id="tax-rules-heading">
+          Configured Tax Rules List
+        </h2>
+        {/* Table Card Wrapper */}
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[700px]">
+              {/* Table Header */}
+              <thead>
+                <tr className="border-b border-slate-200/90 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/50 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  <th
+                    className="py-3.5 pl-6 pr-6 sm:pl-8 w-1/4"
+                    scope="col"
+                  >
+                    TAX RULE NAME
+                  </th>
+                  <th className="py-3.5 px-6 w-1/6" scope="col">
+                    RATE (%)
+                  </th>
+                  <th className="py-3.5 px-6 w-5/12" scope="col">
+                    DESCRIPTION
+                  </th>
+                  <th
+                    className="py-3.5 pl-6 pr-6 sm:pr-8 text-right sm:text-left w-1/6"
+                    scope="col"
+                  >
+                    DEFAULT RULE
+                  </th>
+                </tr>
+              </thead>
+              {/* Table Body */}
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                {taxes.map((t) => (
+                  <tr
+                    key={t.id}
+                    className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors group"
+                  >
+                    <td className="py-4 pl-6 pr-6 sm:pl-8 align-middle">
+                      <span className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-slate-950 dark:group-hover:text-white">
+                        {t.name}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 align-middle">
+                      <span className="font-bold text-slate-900 dark:text-white text-sm tabular-nums font-mono">
+                        {t.rate.toFixed(2)}%
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 align-middle">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 font-normal leading-normal">
+                        {t.description || "No description"}
+                      </p>
+                    </td>
+                    <td className="py-4 pl-6 pr-6 sm:pr-8 align-middle text-right sm:text-left">
+                      {t.is_default ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/80">
+                          <svg
+                            className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 stroke-[2.5]"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              d="m4.5 12.75 6 6 9-13.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          <span>Default System Tax</span>
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 dark:text-slate-500 text-sm font-medium pl-1 select-none font-mono">
+                          —
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      {/* END: TaxRulesTableSection */}
     </div>
   );
 }
-

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { FileText, Plus, ArrowUpRight } from "lucide-react";
 import { getQuotations } from "@/lib/data/store";
 import { formatCurrency } from "@/lib/utils";
 
@@ -12,137 +11,183 @@ export default async function QuotationsPage({
   const quotes = getQuotations(status);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-hairline pb-5">
-        <div>
-          <span className="font-mono text-xs uppercase tracking-wider text-mute">
-            Sales & Customers
+    <div className="space-y-7">
+      {/* Page Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-gray-200/80 dark:border-slate-800 pb-6">
+        <div className="space-y-1">
+          <span className="text-[11px] font-bold text-gray-400 dark:text-slate-500 tracking-wider uppercase block">
+            SALES &amp; CUSTOMERS
           </span>
-          <h1 className="text-2xl font-semibold tracking-[-0.4px] text-ink mt-0.5">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight mt-1 mb-2">
             Quotations
           </h1>
-          <p className="text-xs text-body mt-1">
-            Commercial offers prepared for prospects and existing accounts.
-          </p>
         </div>
-
-        <Link
-          href="/admin/quotations/new"
-          className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-ink px-3 text-xs font-medium text-white shadow-whisper hover:bg-black transition-colors"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          <span>New Quotation</span>
-        </Link>
+        {/* Action Button */}
+        <div>
+          <Link
+            href="/admin/quotations/new"
+            className="inline-flex items-center gap-2 bg-gray-900 hover:bg-black dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 text-white px-4 py-2.5 rounded-lg font-semibold text-sm shadow-sm hover:shadow transition-all duration-150 active:scale-[0.98] ring-1 ring-white/10"
+          >
+            <svg
+              className="w-4 h-4 text-gray-300 dark:text-slate-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth="2.25"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+            <span>New Quotation</span>
+          </Link>
+        </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b border-hairline pb-2 text-xs">
+      {/* Filter Navigation Tabs */}
+      <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 border-b border-transparent">
         <Link
           href="/admin/quotations"
-          className={`px-3 py-1 rounded-sm transition-colors ${
+          className={`font-medium text-xs sm:text-sm px-3.5 py-1.5 rounded-lg shadow-sm whitespace-nowrap transition-colors ${
             !status || status === "all"
-              ? "bg-ink text-white font-medium"
-              : "text-body hover:text-ink"
+              ? "bg-gray-900 text-white dark:bg-white dark:text-slate-900"
+              : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800"
           }`}
         >
           All Quotes
         </Link>
         <Link
           href="/admin/quotations?status=draft"
-          className={`px-3 py-1 rounded-sm transition-colors ${
+          className={`font-medium text-xs sm:text-sm px-3.5 py-1.5 rounded-lg shadow-sm whitespace-nowrap transition-colors ${
             status === "draft"
-              ? "bg-ink text-white font-medium"
-              : "text-body hover:text-ink"
+              ? "bg-gray-900 text-white dark:bg-white dark:text-slate-900"
+              : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800"
           }`}
         >
           Drafts
         </Link>
         <Link
           href="/admin/quotations?status=sent"
-          className={`px-3 py-1 rounded-sm transition-colors ${
+          className={`font-medium text-xs sm:text-sm px-3.5 py-1.5 rounded-lg shadow-sm whitespace-nowrap transition-colors ${
             status === "sent"
-              ? "bg-ink text-white font-medium"
-              : "text-body hover:text-ink"
+              ? "bg-gray-900 text-white dark:bg-white dark:text-slate-900"
+              : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800"
           }`}
         >
           Sent / Open
         </Link>
         <Link
           href="/admin/quotations?status=converted"
-          className={`px-3 py-1 rounded-sm transition-colors ${
+          className={`font-medium text-xs sm:text-sm px-3.5 py-1.5 rounded-lg shadow-sm whitespace-nowrap transition-colors ${
             status === "converted"
-              ? "bg-ink text-white font-medium"
-              : "text-body hover:text-ink"
+              ? "bg-gray-900 text-white dark:bg-white dark:text-slate-900"
+              : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800"
           }`}
         >
           Converted to Subscription
         </Link>
       </div>
 
-      {/* Quotations Table */}
-      <div className="rounded-md border border-hairline bg-canvas-elevated shadow-whisper overflow-hidden">
+      {/* BEGIN: QuotationsTableContainer */}
+      <div
+        className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden"
+        data-purpose="quotations-table-wrapper"
+      >
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-canvas border-b border-hairline text-[11px] font-mono uppercase text-mute">
-              <tr>
-                <th className="px-5 py-3 font-medium">Quote #</th>
-                <th className="px-5 py-3 font-medium">Customer</th>
-                <th className="px-5 py-3 font-medium">Plan</th>
-                <th className="px-5 py-3 font-medium">Total Amount</th>
-                <th className="px-5 py-3 font-medium">Valid Until</th>
-                <th className="px-5 py-3 font-medium">Status</th>
-                <th className="px-5 py-3 font-medium text-right">Action</th>
+          <table className="w-full text-left border-collapse min-w-[768px]">
+            {/* Table Header */}
+            <thead>
+              <tr className="border-b border-gray-200 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-800/50 text-[11px] font-semibold text-gray-500 dark:text-slate-400 tracking-wider uppercase">
+                <th className="py-3.5 px-6" scope="col">
+                  QUOTE #
+                </th>
+                <th className="py-3.5 px-6" scope="col">
+                  CUSTOMER
+                </th>
+                <th className="py-3.5 px-6" scope="col">
+                  PLAN
+                </th>
+                <th className="py-3.5 px-6" scope="col">
+                  TOTAL AMOUNT
+                </th>
+                <th className="py-3.5 px-6" scope="col">
+                  VALID UNTIL
+                </th>
+                <th className="py-3.5 px-6" scope="col">
+                  STATUS
+                </th>
+                <th className="py-3.5 px-6 text-right" scope="col">
+                  ACTION
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-hairline">
+            {/* Table Body */}
+            <tbody className="divide-y divide-gray-100 dark:divide-slate-800 text-sm">
               {quotes.map((q) => (
-                <tr key={q.id} className="hover:bg-canvas/50 transition-colors">
-                  <td className="px-5 py-4 font-mono font-semibold text-ink">
-                    <Link href={`/admin/quotations/${q.id}`} className="hover:text-link">
+                <tr
+                  key={q.id}
+                  className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors group"
+                >
+                  {/* Quote Number */}
+                  <td className="py-4 px-6 font-semibold text-gray-900 dark:text-white text-sm font-mono">
+                    <Link
+                      href={`/admin/quotations/${q.id}`}
+                      className="hover:text-blue-600 dark:hover:text-blue-400"
+                    >
                       {q.quote_number}
                     </Link>
                   </td>
-                  <td className="px-5 py-4">
-                    <Link
-                      href={`/admin/customers/${q.customer_id}`}
-                      className="font-medium text-ink hover:text-link block"
-                    >
-                      {q.customer?.full_name}
-                    </Link>
-                    <span className="text-[11px] text-mute">
-                      {q.customer?.company_name}
-                    </span>
+                  {/* Customer Details */}
+                  <td className="py-4 px-6">
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-gray-900 dark:text-white leading-snug">
+                        {q.customer?.full_name}
+                      </span>
+                      {q.customer?.company_name && (
+                        <span className="text-xs text-gray-500 dark:text-slate-400">
+                          {q.customer?.company_name}
+                        </span>
+                      )}
+                    </div>
                   </td>
-                  <td className="px-5 py-4 text-body">
+                  {/* Plan */}
+                  <td className="py-4 px-6 text-gray-600 dark:text-slate-300 font-normal">
                     {q.plan?.name || "Custom Plan"}
                   </td>
-                  <td className="px-5 py-4 font-semibold text-ink">
+                  {/* Total Amount */}
+                  <td className="py-4 px-6 font-bold text-gray-900 dark:text-white font-mono">
                     {formatCurrency(q.total_amount)}
                   </td>
-                  <td className="px-5 py-4 font-mono text-mute">
+                  {/* Valid Until */}
+                  <td className="py-4 px-6 text-gray-600 dark:text-slate-400 font-normal font-mono">
                     {q.valid_until}
                   </td>
-                  <td className="px-5 py-4">
+                  {/* Status Badge */}
+                  <td className="py-4 px-6">
                     <span
-                      className={`rounded-xs px-2 py-0.5 font-mono text-[10px] uppercase font-medium ${
+                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold tracking-wide uppercase font-mono ${
                         q.status === "converted"
-                          ? "bg-emerald-500/10 text-emerald-600"
+                          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 ring-1 ring-inset ring-emerald-600/20 dark:ring-emerald-500/20"
                           : q.status === "sent"
-                          ? "bg-blue-500/10 text-blue-600"
-                          : "bg-canvas text-mute border border-hairline"
+                          ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 ring-1 ring-inset ring-blue-600/20 dark:ring-blue-500/20"
+                          : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 ring-1 ring-inset ring-slate-300 dark:ring-slate-700"
                       }`}
                     >
                       {q.status}
                     </span>
                   </td>
-                  <td className="px-5 py-4 text-right">
+                  {/* Action Link/Button */}
+                  <td className="py-4 px-6 text-right">
                     <Link
                       href={`/admin/quotations/${q.id}`}
-                      className="inline-flex items-center gap-1 rounded-sm border border-hairline bg-canvas-elevated px-2.5 py-1 text-xs font-medium text-ink hover:bg-canvas transition-colors"
+                      aria-label={`View quotation ${q.quote_number}`}
+                      className="inline-flex items-center gap-1 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-200 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-800 px-3 py-1.5 rounded-lg text-xs font-medium shadow-2xs transition-all"
                     >
                       <span>View</span>
-                      <ArrowUpRight className="h-3 w-3 text-mute" />
+                      <span className="text-gray-400 font-sans text-xs">↗</span>
                     </Link>
                   </td>
                 </tr>
@@ -151,7 +196,7 @@ export default async function QuotationsPage({
           </table>
         </div>
       </div>
+      {/* END: QuotationsTableContainer */}
     </div>
   );
 }
-
