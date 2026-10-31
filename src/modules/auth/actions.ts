@@ -45,6 +45,7 @@ export async function signUpCustomerAction(
   if (!supabaseUrl || supabaseUrl.includes("placeholder")) {
     const cookieStore = await cookies();
     cookieStore.set("brightloop_session_role", "customer", { path: "/" });
+    cookieStore.set("brightloop_session_user", email, { path: "/" });
     redirect("/portal");
   }
 
@@ -126,6 +127,7 @@ export async function signInAction(
   if (!supabaseUrl || supabaseUrl.includes("placeholder")) {
     const cookieStore = await cookies();
     cookieStore.set("brightloop_session_role", "customer", { path: "/" });
+    cookieStore.set("brightloop_session_user", email, { path: "/" });
     redirect("/portal");
   }
 

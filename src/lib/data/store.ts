@@ -2109,6 +2109,16 @@ export function getCustomerForUser(userIdOrEmail: string): CustomerProfile | nul
     (c) => c.id === userIdOrEmail || c.email.toLowerCase() === lower
   );
   if (found) return found;
+  // Map dummy customer identifiers to pre-seeded customer account (cust-001)
+  if (
+    lower === "customer" ||
+    lower.startsWith("customer@") ||
+    lower.includes("demo") ||
+    lower.includes("apex") ||
+    lower.includes("sarah")
+  ) {
+    return store.customers[0] || null;
+  }
   // Fallback to first customer for local customer demo session
   return store.customers[0] || null;
 }

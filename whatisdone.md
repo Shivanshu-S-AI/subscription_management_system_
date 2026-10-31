@@ -610,6 +610,25 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 20: Dummy Customer Account Provisioning & 1-Click Login
+- **Pre-Configured Dummy Customer Accounts:**
+  - Provisioned dummy customer accounts for immediate customer login:
+    - Primary Demo: `customer@brightloopsoftware.com` (Password: `Customer123!`)
+    - Enterprise Client: `finance@apexcloud.io` (Password: `Customer123!`, Sarah Jenkins, Apex Cloud Systems)
+  - Connected `customer@brightloopsoftware.com` in data store resolution ([`src/lib/data/store.ts`](file:///Users/shiv/Odoo_hackathon_project/src/lib/data/store.ts)) and session profile resolution ([`src/modules/auth/service.ts`](file:///Users/shiv/Odoo_hackathon_project/src/modules/auth/service.ts)), providing immediate access to active subscriptions (`SUB-2026-001`), past-due invoices (`INV-2026-002`), and historical paid invoices (`INV-2026-001`).
+- **1-Click Quick-Fill Customer Login UI:**
+  - Added quick-fill suggestion chips on [`/login`](file:///Users/shiv/Odoo_hackathon_project/src/app/(auth)/login/page.tsx) matching the `/internal-login` design pattern:
+    - `[Demo Customer]` (`customer@brightloopsoftware.com`)
+    - `[Sarah Jenkins (Apex Cloud)]` (`finance@apexcloud.io`)
+- **Database Seeding Migration:**
+  - Created migration [`supabase/migrations/20261031_005_seed_customer_account.sql`](file:///Users/shiv/Odoo_hackathon_project/supabase/migrations/20261031_005_seed_customer_account.sql) for seeding `customer@brightloopsoftware.com` directly into Supabase PostgreSQL `auth.users` and `public.profiles`.
+- **Automated Verification:**
+  - Verified live login flow via Chrome DevTools MCP: navigating to `/login`, 1-click filling `Demo Customer`, clicking `Sign In`, and successfully entering `/portal` with populated subscription details.
+  - All 43 automated tests passing (`npm test`).
+  - Next.js production build clean across all 61 routes (`npm run build`).
+
+---
+
 ## 3. Current Repository State
 
 - **Branch:** `main`

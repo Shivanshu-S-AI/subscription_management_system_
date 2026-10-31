@@ -54,13 +54,38 @@ export async function getCurrentUser(): Promise<{
       }
     }
 
+    let customerName = "Sarah Jenkins (Apex Cloud)";
+    let customerEmail = "customer@brightloopsoftware.com";
+    let customerId = "cust-001";
+
+    if (!isDevAdmin && !isDevStaff && devSessionUser) {
+      const lower = devSessionUser.toLowerCase().trim();
+      if (lower.includes("customer") || lower.includes("apex") || lower.includes("sarah")) {
+        customerName = "Sarah Jenkins (Apex Cloud)";
+        customerEmail = lower.includes("@") ? lower : "customer@brightloopsoftware.com";
+        customerId = "cust-001";
+      } else if (lower.includes("chen") || lower.includes("nexus")) {
+        customerName = "Michael Chen (Nexus Dynamics)";
+        customerEmail = "ops@nexusdynamics.co";
+        customerId = "cust-002";
+      } else if (lower.includes("rostova") || lower.includes("strata")) {
+        customerName = "Elena Rostova (Strata Labs)";
+        customerEmail = "analytics@stratalabs.com";
+        customerId = "cust-003";
+      } else {
+        customerName = "Sarah Jenkins (Apex Cloud)";
+        customerEmail = lower;
+        customerId = "cust-001";
+      }
+    }
+
     const devUser = {
-      id: isDevAdmin ? adminId : isDevStaff ? staffId : "cust-001",
+      id: isDevAdmin ? adminId : isDevStaff ? staffId : customerId,
       email: isDevAdmin
         ? adminEmail
         : isDevStaff
         ? staffEmail
-        : "finance@apexcloud.io",
+        : customerEmail,
     };
     const devProfile: UserProfile = {
       id: devUser.id,
@@ -69,7 +94,7 @@ export async function getCurrentUser(): Promise<{
         ? adminName
         : isDevStaff
         ? staffName
-        : "Sarah Jenkins (Apex Cloud)",
+        : customerName,
       role: devSessionRole,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

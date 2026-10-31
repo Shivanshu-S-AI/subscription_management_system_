@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AuthCard } from "@/components/auth/auth-card";
 import { signInAction } from "@/modules/auth/actions";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, Check } from "lucide-react";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -103,6 +103,53 @@ function LoginForm() {
             <span>{errorMessage}</span>
           </div>
         )}
+
+        {/* Quick-Fill Customer Account Suggestion Chips */}
+        <div className="rounded-sm border border-hairline bg-canvas/60 p-2.5">
+          <div className="flex items-center justify-between text-[11px] text-mute mb-2">
+            <span className="font-mono uppercase tracking-wider text-[10px]">
+              Customer Demo Accounts
+            </span>
+            <span className="text-[10px] text-mute">1-click fill</span>
+          </div>
+
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setEmail("customer@brightloopsoftware.com");
+                setPassword("Customer123!");
+              }}
+              className={`inline-flex items-center gap-1.5 rounded-sm border px-2 py-1 text-[11px] transition-colors ${
+                email === "customer@brightloopsoftware.com"
+                  ? "border-ink bg-ink text-white font-medium"
+                  : "border-hairline bg-canvas-elevated text-body hover:border-ink/50 hover:text-ink"
+              }`}
+            >
+              {email === "customer@brightloopsoftware.com" && (
+                <Check className="h-3 w-3" />
+              )}
+              Demo Customer
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail("finance@apexcloud.io");
+                setPassword("Customer123!");
+              }}
+              className={`inline-flex items-center gap-1.5 rounded-sm border px-2 py-1 text-[11px] transition-colors ${
+                email === "finance@apexcloud.io"
+                  ? "border-ink bg-ink text-white font-medium"
+                  : "border-hairline bg-canvas-elevated text-body hover:border-ink/50 hover:text-ink"
+              }`}
+            >
+              {email === "finance@apexcloud.io" && (
+                <Check className="h-3 w-3" />
+              )}
+              Sarah Jenkins (Apex Cloud)
+            </button>
+          </div>
+        </div>
 
         {/* Email */}
         <div>
