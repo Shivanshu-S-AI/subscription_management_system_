@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --canvas: #fafafa;
+  --canvas-elevated: #ffffff;
+  --ink: #171717;
+  --body: #4d4d4d;
+  --mute: #8f8f8f;
+  --faint: #a1a1a1;
+  --hairline: #ebebeb;
+  --hairline-soft: #f2f2f2;
+  --link: #0070f3;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--canvas);
+  color: var(--body);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hero Mesh Gradient strictly following DESIGN.md */
+.hero-mesh-gradient {
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(80, 227, 194, 0.12) 0px, transparent 45%),
+    radial-gradient(at 85% 10%, rgba(0, 124, 240, 0.12) 0px, transparent 45%),
+    radial-gradient(at 50% 50%, rgba(121, 40, 202, 0.09) 0px, transparent 55%),
+    radial-gradient(at 80% 85%, rgba(255, 0, 128, 0.08) 0px, transparent 45%),
+    radial-gradient(at 20% 85%, rgba(249, 203, 40, 0.10) 0px, transparent 45%);
+}
+
+/* Subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #ebebeb;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
