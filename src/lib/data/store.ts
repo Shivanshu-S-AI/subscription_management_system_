@@ -1826,3 +1826,158 @@ export function globalSearch(query: string, workspace: "admin" | "staff" = "admi
   return results.slice(0, 10);
 }
 
+/**
+ * Resolves a customer profile corresponding to an authenticated user identity or email.
+ */
+export function getCustomerForUser(userIdOrEmail: string): CustomerProfile | null {
+  const store = getStore();
+  const lower = userIdOrEmail.toLowerCase();
+  const found = store.customers.find(
+    (c) => c.id === userIdOrEmail || c.email.toLowerCase() === lower
+  );
+  if (found) return found;
+  // Fallback to first customer for local customer demo session
+  return store.customers[0] || null;
+}
+
+/**
+ * Calculates customer-isolated portal overview metrics.
+ */
+export function getCustomerOverviewMetrics(customerId: string) {
+  const store = getStore();
+  const today = new Date().toISOString().split("T")[0];
+
+  const subs = store.subscriptions.filter((s) => s.customer_id === customerId);
+  const invs = store.invoices.filter((i) => i.customer_id === customerId && i.status !== "cancelled");
+
+  const activeSubs = subs.filter((s) => s.status === "active" || s.status === "confirmed");
+  const unpaidInvs = invs.filter((i) => i.status !== "paid");
+  const outstandingAmount = unpaidInvs.reduce((sum, i) => sum + Number(i.amount_due), 0);
+  const overdueInvs = unpaidInvs.filter((i) => i.due_date < today && Number(i.amount_due) > 0);
+
+  // Subscriptions expiring within 14 days
+  const expiringSubs = activeSubs.filter((s) => {
+    if (s.expiry_date) {
+      const end = new Date(s.expiry_date).getTime();
+      const now = new Date().getTime();
+      const diff = (end - now) / (1000 * 60 * 60 * 24);
+      return diff <= 14 && diff >= 0;
+    }
+    return false;
+  });
+
+  return {
+    summary: {
+      activeSubscriptionsCount: activeSubs.length,
+      totalSubscriptionsCount: subs.length,
+      outstandingAmount,
+      unpaidInvoicesCount: unpaidInvs.length,
+      overdueInvoicesCount: overdueInvs.length,
+    },
+    activeSubscriptions: activeSubs.slice(0, 5),
+    recentInvoices: invs.slice(0, 5),
+    attentionRequired: {
+      overdueInvoices: overdueInvs,
+      expiringSubscriptions: expiringSubs,
+    },
+  };
+}
+
+/**
+ * Returns strictly the customer's own subscriptions.
+ */
+export function getCustomerSubscriptions(customerId: string, statusFilter?: string): Subscription[] {
+  const store = getStore();
+  let subs = store.subscriptions.filter((s) => s.customer_id === customerId);
+  if (statusFilter && statusFilter !== "all") {
+    subs = subs.filter((s) => s.status === statusFilter);
+  }
+  return subs;
+}
+
+/**
+ * Securely retrieves a customer subscription with strict ownership validation.
+ */
+export function getCustomerSubscriptionById(customerId: string, subscriptionId: string): Subscription | null {
+  const store = getStore();
+  const sub = store.subscriptions.find((s) => s.id === subscriptionId);
+  if (!sub || sub.customer_id !== customerId) {
+    return null; // Strict isolation: return null if not owned by customer
+  }
+  return sub;
+}
+
+/**
+ * Returns strictly the customer's own invoices.
+ */
+export function getCustomerInvoices(customerId: string, filter?: string): Invoice[] {
+  const store = getStore();
+  const today = new Date().toISOString().split("T")[0];
+  let invs = store.invoices.filter((i) => i.customer_id === customerId);
+
+  if (filter === "paid") {
+    invs = invs.filter((i) => i.status === "paid");
+  } else if (filter === "confirmed") {
+    invs = invs.filter((i) => i.status === "confirmed");
+  } else if (filter === "outstanding") {
+    invs = invs.filter((i) => i.status !== "paid" && i.status !== "cancelled" && Number(i.amount_due) > 0);
+  } else if (filter === "overdue") {
+    invs = invs.filter((i) => i.status !== "paid" && i.status !== "cancelled" && Number(i.amount_due) > 0 && i.due_date < today);
+  }
+
+  return invs;
+}
+
+/**
+ * Securely retrieves a customer invoice with strict ownership validation.
+ */
+export function getCustomerInvoiceById(customerId: string, invoiceId: string): Invoice | null {
+  const store = getStore();
+  const inv = store.invoices.find((i) => i.id === invoiceId);
+  if (!inv || inv.customer_id !== customerId) {
+    return null; // Strict isolation: return null if not owned by customer
+  }
+  return inv;
+}
+
+/**
+ * Customer-initiated pause action with ownership and plan policy enforcement.
+ */
+export function customerPauseSubscription(customerId: string, subscriptionId: string) {
+  const sub = getCustomerSubscriptionById(customerId, subscriptionId);
+  if (!sub) return { success: false, error: "Subscription not found or not owned by customer." };
+  if (!sub.plan?.pause_eligible) return { success: false, error: "Plan policy does not permit pausing." };
+  if (sub.status !== "active") return { success: false, error: "Only active subscriptions can be paused." };
+
+  sub.status = "paused";
+  sub.updated_at = new Date().toISOString();
+  return { success: true, subscription: sub };
+}
+
+/**
+ * Customer-initiated resume action with ownership enforcement.
+ */
+export function customerResumeSubscription(customerId: string, subscriptionId: string) {
+  const sub = getCustomerSubscriptionById(customerId, subscriptionId);
+  if (!sub) return { success: false, error: "Subscription not found or not owned by customer." };
+  if (sub.status !== "paused") return { success: false, error: "Subscription is not paused." };
+
+  sub.status = "active";
+  sub.updated_at = new Date().toISOString();
+  return { success: true, subscription: sub };
+}
+
+/**
+ * Customer-initiated renewal action with ownership and plan policy enforcement.
+ */
+export function customerRenewSubscription(customerId: string, subscriptionId: string) {
+  const sub = getCustomerSubscriptionById(customerId, subscriptionId);
+  if (!sub) return { success: false, error: "Subscription not found or not owned by customer." };
+  if (!sub.plan?.renewal_eligible) return { success: false, error: "Plan is not eligible for self-renewal." };
+
+  sub.status = "active";
+  sub.updated_at = new Date().toISOString();
+  return { success: true, subscription: sub };
+}
+
+

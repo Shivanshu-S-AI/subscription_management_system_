@@ -16,16 +16,25 @@ export async function getCurrentUser(): Promise<{
   const devSessionRole = cookieStore.get("brightloop_session_role")?.value as UserRole | undefined;
 
   // Support local dev / demo session
-  if (devSessionRole === "admin" || devSessionRole === "staff") {
+  if (devSessionRole === "admin" || devSessionRole === "staff" || devSessionRole === "customer") {
     const isDevAdmin = devSessionRole === "admin";
+    const isDevStaff = devSessionRole === "staff";
     const devUser = {
-      id: isDevAdmin ? "admin-dev-id" : "staff-dev-id",
-      email: isDevAdmin ? "admin@brightloop.com" : "staff@brightloopsoftware.com",
+      id: isDevAdmin ? "admin-dev-id" : isDevStaff ? "staff-dev-id" : "cust-001",
+      email: isDevAdmin
+        ? "admin@brightloop.com"
+        : isDevStaff
+        ? "staff@brightloopsoftware.com"
+        : "finance@apexcloud.io",
     };
     const devProfile: UserProfile = {
       id: devUser.id,
       email: devUser.email,
-      full_name: isDevAdmin ? "Brightloop Administrator" : "Operations Staff",
+      full_name: isDevAdmin
+        ? "Brightloop Administrator"
+        : isDevStaff
+        ? "Operations Staff"
+        : "Sarah Jenkins (Apex Cloud)",
       role: devSessionRole,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

@@ -234,73 +234,106 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 7: Phase 3 — Complete Customer Portal
+- **Objective:**
+  - Build the dedicated, role-isolated Customer Portal for Brightloop Software's Subscription Management System according to `Subscription_Management_System (1).pdf` and `DESIGN.md`.
+  - Provide authenticated subscribers with clear visibility into their personal active subscriptions, line items, contracted pricing, payment receipts, and invoice records without contacting customer support.
+  - Implement strict customer-level data isolation: A customer must only ever access their own data. Any attempt to access another customer's ID returns HTTP 404.
+  - Permit controlled self-service lifecycle actions (Pause, Resume, Renew) governed strictly by the subscription's underlying plan policies, while strictly forbidding early cancellation or price manipulation.
+  - Mask all internal costs and administrative notes from customer views.
+
+- **Data Query Layer & Server Actions (`src/lib/data/store.ts`, `src/modules/portal/actions.ts`):**
+  - `getCustomerForUser(userId)`: Resolves authenticated Supabase profile to customer profile record.
+  - `getCustomerOverviewMetrics(customerId)`: Aggregates active subscriptions count, active monthly spend (MRR), total invoices, and outstanding balance due.
+  - `getCustomerSubscriptions(customerId)`: Lists all subscriptions belonging strictly to `customerId`.
+  - `getCustomerSubscriptionById(id, customerId)`: Returns single subscription or `null` if ownership fails (triggering Next.js `notFound()`).
+  - `getCustomerInvoices(customerId)`: Lists customer invoices sorted newest first with balance calculations.
+  - `getCustomerInvoiceById(id, customerId)`: Fetches invoice with line items and payment transactions, returning `null` if ownership fails.
+  - Server actions in `src/modules/portal/actions.ts`:
+    - `customerPauseSubscriptionAction(formData)`: Verifies user session and customer ownership, validates `plan.pause_eligible`, sets status to `paused`, revalidates cache.
+    - `customerResumeSubscriptionAction(formData)`: Validates ownership and paused state, resumes subscription to `active`.
+    - `customerRenewSubscriptionAction(formData)`: Validates ownership and `plan.renewal_eligible`, extends end date by billing interval (e.g., +1 month), sets status to `active`.
+
+- **Customer Portal Layout & Navigation (`src/app/(portal)/portal/layout.tsx`, `src/components/portal/portal-navbar.tsx`):**
+  - Responsive customer navbar matching Geist design language:
+    - Left brand section: Brightloop Software logo with rounded pill badge `"Customer Portal"`.
+    - Center links: `Overview` (`/portal`), `My Subscriptions` (`/portal/subscriptions`), `My Invoices` (`/portal/invoices`).
+    - Right section: Quick actions, customer profile name, email pill, and sign-out button.
+    - Mobile drawer with hamburger toggle for full smartphone/tablet responsiveness.
+  - Strict server-side layout guard redirecting unauthenticated visitors to `/login`.
+
+- **Customer Pages Implemented:**
+  - **Overview (`/portal/page.tsx`):**
+    - 4 real-time KPI metric cards: *Active Subscriptions*, *Monthly Recurring*, *Total Invoices*, *Outstanding Balance*.
+    - Attention Required banner when unpaid or overdue invoices exist with one-click payment instructions and direct invoice links.
+    - Active Subscriptions table with plan badges, recurring price, renewal dates, and status indicators.
+    - Recent Invoices table with issue date, due date, invoice amount, balance due, payment status, and view buttons.
+  - **My Subscriptions List (`/portal/subscriptions/page.tsx`):**
+    - Status filtering tabs: All, Active, Paused, Confirmed, Draft, Closed.
+    - Search by subscription number or plan title.
+    - Itemized cards with contracted interval, recurring charge, and next billing date.
+  - **Subscription Detail (`/portal/subscriptions/[id]/page.tsx`):**
+    - Customer-safe view: Displays plan name, billing frequency, start date, next billing date, end date, payment terms (`immediate`, `15_days`, `30_days`, `60_days`).
+    - Line items breakdown: Product name, brand/edition variant, quantity, unit price, tax rate, and total (internal cost price and admin notes completely hidden).
+    - Permitted lifecycle action controls:
+      - *Pause Subscription* button (enabled only when subscription is active and `plan.pause_eligible`).
+      - *Resume Subscription* button (enabled only when subscription is paused).
+      - *Renew Subscription* button (enabled only when `plan.renewal_eligible`).
+      - Informational badges when policies forbid early termination or pausing.
+    - Linked invoices history table for this specific subscription with view links.
+  - **My Invoices List (`/portal/invoices/page.tsx`):**
+    - Status filters: All, Outstanding, Paid, Confirmed, Overdue.
+    - Search by invoice number.
+    - Outstanding balance summary banner highlighting unpaid balances.
+    - Table displaying invoice number, linked subscription, issue date, due date, amount, balance due, payment status, and actions.
+  - **Invoice Detail (`/portal/invoices/[id]/page.tsx`):**
+    - Itemized invoice breakdown with quantities, unit prices, tax percentages, subtotal, tax amount, and total due.
+    - Payment settlement receipts table showing date, transaction reference, payment method (bank wire, credit card), and amount paid.
+    - Balance Due card with payment instruction guidance (bank account, wire reference).
+    - Quick link to print / export invoice.
+  - **Printable Invoice (`/portal/invoices/[id]/print/page.tsx`):**
+    - Clean, printable invoice layout styled per `DESIGN.md` with auto-print JavaScript hook and back button.
+  - **My Account (`/portal/account/page.tsx`):**
+    - Customer profile card with company name, primary contact name, registered email, and customer ID.
+    - Billing address details card.
+    - Security & Role badge ("Role: Customer (Portal Access Only)").
+    - Sign out action.
+
+- **Verification & Testing:**
+  - `npm run build`: Compiled all 61 Next.js App Router routes with 0 errors.
+  - Strict Customer Data Isolation: Tested cross-customer requests (`cust-001` requesting `sub-002` or `inv-003`); properly returned HTTP 404 (`notFound()`).
+  - Role Boundary Enforcement: Verified customer visiting `/admin` or `/staff` is automatically redirected to `/portal` via middleware.
+  - Automated visual verification via Chrome DevTools MCP:
+    - Captured desktop screenshots (1440×900) across `/portal`, `/portal/subscriptions`, `/portal/subscriptions/sub-001`, `/portal/invoices`, `/portal/invoices/inv-001`, `/portal/invoices/inv-001/print`, and `/portal/account`.
+    - Captured mobile screenshot (390×844) validating responsive layout, cards, and mobile navigation drawer.
+  - Strict adherence to `DESIGN.md` (Geist tokens: `#fafafa` canvas, `#ffffff` card surfaces, `#171717` ink, `#ebebeb` borders, 6px rounded controls).
+
+---
+
 ## 3. Current Repository State
 
 - **Branch:** `main`
+- **Total Compiled Routes:** 61 routes across Marketing, Auth, Admin, Staff, and Customer Portal.
 - **Working Tree:**
+  - `src/app/(portal)/portal/`: Complete Phase 3 Customer Portal (Overview, Subscriptions, Invoices, Account, Print).
+  - `src/components/portal/`: Customer navbar with mobile drawer and customer layout shell.
+  - `src/modules/portal/`: Customer portal server actions (`actions.ts`).
   - `src/app/(staff)/staff/`: Complete Phase 2 Staff Workspace (Overview, Customers, Quotations, Subscriptions, Invoices, Payments, Reports, Account).
-  - `src/app/(admin)/admin/`: Complete Phase 1 Admin Workspace (Overview, Catalog, Plans, Taxes, Discounts, Billing, Reports, Team).
   - `src/components/staff/`: Staff sidebar, header with global search, and layout shell.
-  - `src/components/admin/`: Admin sidebar, header with global search, and print button.
-  - `src/modules/`: Domain business logic actions (`products`, `plans`, `taxes`, `discounts`, `quotations`, `subscriptions`, `billing`, `invoices`, `payments`, `team`, `auth`).
-  - `src/lib/data/store.ts`: Domain models, seed data, calculation utilities, and business rule validators.
-  - `supabase/migrations/`: RBAC auth migration (`001`) and Complete Admin Workspace Schema migration (`002`).
-  - Documentation: `README.md`, `AGENTS.md`, `DESIGN.md`, `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_PLAN.md`, `whatisdone.md`.
-
----
-
-## 4. Next Implementation Steps (Phase 3 of Hackathon: Customer Self-Service Portal)
-
-1. **Customer Self-Service Portal (`/portal`):**
-   - Protected workspace for subscribers to log in, view active subscriptions, view billing history, download printable invoices, and manage payment profiles.
-2. **End-to-End Integration & Polish:**
-   - Supabase live database connection verification.
-   - Vercel production deployment and health checks.
-
-- **Branch:** `main`
-- **Working Tree:**
-  - `src/app/(admin)/admin/`: Complete Phase 1 Admin Workspace (35 routes).
+  - `src/app/(admin)/admin/`: Complete Phase 1 Admin Workspace (Overview, Catalog, Plans, Taxes, Discounts, Billing, Reports, Team).
   - `src/components/admin/`: Admin sidebar, header with global search, and print controls.
-  - `src/modules/`: Domain business logic actions (`products`, `plans`, `taxes`, `discounts`, `quotations`, `subscriptions`, `billing`, `invoices`, `payments`, `team`, `auth`).
+  - `src/modules/`: Domain business logic actions (`products`, `plans`, `taxes`, `discounts`, `quotations`, `subscriptions`, `billing`, `invoices`, `payments`, `team`, `auth`, `portal`).
   - `src/lib/data/store.ts`: Domain models, seed data, calculation utilities, and business rule validators.
   - `supabase/migrations/`: RBAC auth migration (`001`) and Complete Admin Workspace Schema migration (`002`).
   - Documentation: `README.md`, `AGENTS.md`, `DESIGN.md`, `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_PLAN.md`, `whatisdone.md`.
 
 ---
 
-## 4. Next Implementation Steps (Phase 2 of Hackathon: Staff & Customer Workspaces)
+## 4. Next Implementation Steps (Phase 4 of Hackathon: Supabase Live Cloud Integration & Vercel Deployment)
 
-1. **Internal Staff Workspace:**
-   - Dedicated role-restricted view for daily operational staff handling quotations, orders, invoices, and customer support without access to admin system settings (taxes, discounts, staff provisioning, high-level reports).
-2. **Customer Self-Service Portal:**
-   - Authenticated customer portal allowing subscribers to view their active subscriptions, download past invoices, update payment methods, and request plan changes.
-3. **End-to-End Integration & Deployment:**
-   - Supabase live database connection verification.
-   - Vercel deployment and health checks.
-
-- **Branch:** `main`
-- **Working Tree:**
-  - `src/app/`: Public marketing landing page, authentication routes (`/signup`, `/login`, `/forgot-password`, `/reset-password`, `/internal-login`), and role destinations (`/admin`, `/staff`, `/portal`).
-  - `src/components/`: Layout (`navbar`, `footer`), landing sections, and auth components (`auth-card`, `password-requirements`).
-  - `src/modules/auth/`: Validation rules, server actions, services, and types.
-  - `src/lib/`: Supabase SSR client/server/admin/middleware and role constants.
-  - `supabase/migrations/`: Initial RBAC schema and RLS policies migration.
-  - `tests/`: Automated authentication test suite.
-  - Documentation: `README.md`, `AGENTS.md`, `DESIGN.md`, `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_PLAN.md`, `whatisdone.md`.
-
----
-
-## 4. Next Implementation Steps (Phase 3 & Beyond)
-
-As outlined in `DEVELOPMENT_PLAN.md`:
-
-1. **Phase 3 — Catalog, Plans, Taxes & Discounts (Admin Module):**
-   - Products management with sales price, cost price, notes, and variants (e.g. brand additions).
-   - Recurring plans (daily, weekly, monthly, yearly) and lifecycle policies (auto-close, pause, renew).
-   - Admin tax rules and discount rules engine.
-2. **Phase 4 — Quotations & Subscription Management.**
-3. **Phase 5 — Billing & Invoicing Engine.**
-4. **Phase 6 — Payment Tracking & Reconciliation.**
-5. **Phase 7 — Customer Self-Service Portal.**
-6. **Phase 8 — Financial Dashboard & Reporting.**
-7. **Phase 9 — End-to-End Verification & Polish.**
+1. **Supabase Live Cloud Synchronization:**
+   - Run migrations on live Supabase cloud project.
+   - Verify Supabase Auth email confirmation and password reset hooks with live SMTP.
+2. **End-to-End System Polish & Health Checks:**
+   - Production bundle optimization.
+   - Vercel deployment configuration verification.

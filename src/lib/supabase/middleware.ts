@@ -17,10 +17,20 @@ export async function updateSession(request: NextRequest) {
   let userRole: UserRole = "customer";
 
   // Check dev session cookie first
-  if (devSessionRole === "admin" || devSessionRole === "staff") {
+  if (devSessionRole === "admin" || devSessionRole === "staff" || devSessionRole === "customer") {
     user = {
-      id: devSessionRole === "admin" ? "admin-dev-id" : "staff-dev-id",
-      email: devSessionRole === "admin" ? "admin@brightloop.com" : "staff@brightloopsoftware.com",
+      id:
+        devSessionRole === "admin"
+          ? "admin-dev-id"
+          : devSessionRole === "staff"
+          ? "staff-dev-id"
+          : "cust-001",
+      email:
+        devSessionRole === "admin"
+          ? "admin@brightloop.com"
+          : devSessionRole === "staff"
+          ? "staff@brightloopsoftware.com"
+          : "finance@apexcloud.io",
     };
     userRole = devSessionRole;
   } else if (supabaseUrl && supabaseAnonKey && !supabaseUrl.includes("placeholder")) {
