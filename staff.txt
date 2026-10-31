@@ -1,501 +1,500 @@
 ================================================================================
 BRIGHTLOOP SOFTWARE — SUBSCRIPTION MANAGEMENT SYSTEM
-SYSTEM FUNCTIONALITY SPECIFICATION & PERMISSION MATRIX
-(Admin Panel, Staff Operations Panel, and Customer Portal)
+COMPLETE FUNCTIONAL SPECIFICATION & SYSTEM CAPABILITIES DIRECTORY
 ================================================================================
+Generated for: System Architecture, Internal Staff, Administrators & Developers
+Location: /Users/shiv/Odoo_hackathon_project/staff.txt
+System Standard: Next.js App Router (Modular Monolith) + Supabase Auth & PostgreSQL
 
-Date: October 31, 2026
-Project: Brightloop Software (Data Analysis Software & Subscription Management)
-Architecture: Modular Monolith (Next.js 15 App Router, TypeScript, Supabase PostgreSQL, RLS)
-Design System: Geist Design System (Strict adherence to DESIGN.md, Dark/Light Mode)
-
---------------------------------------------------------------------------------
+================================================================================
 TABLE OF CONTENTS
---------------------------------------------------------------------------------
-1. System Role Architecture & Data Boundary Model
-2. Admin Panel Functionality (Full System Management)
-3. Staff Panel Functionality (Daily Operations & Sales Execution)
-4. Customer Portal Functionality (Self-Service & Isolation)
-5. Comparative Feature & Permission Matrix
-6. End-to-End Cross-System Workflows & Lifecycle Engines
+================================================================================
+1. AUTHENTICATION & LOGIN SYSTEM
+   1.1 Architecture & Role-Based Access Control (RBAC)
+   1.2 Public Customer Authentication & Registration Flow
+   1.3 Internal Staff & Admin Unified Login Flow
+   1.4 Password Security & Strength Engine
+   1.5 Password Recovery & Reset Flow
+   1.6 Session Management & Route Protection Middleware
+
+2. ADMIN PANEL (/admin)
+   2.1 Overview Dashboard & Operational Intelligence
+   2.2 Product & Service Catalog Management
+   2.3 Subscription Plans & Cadence Configuration
+   2.4 Tax Rules & Calculation Modes
+   2.5 Discount Rules & Information-Dense Policy Engine
+   2.6 Quotation Templates & Blueprint Engine
+   2.7 Quotations Administration & Approval
+   2.8 Subscriptions Administration & Lifecycle Controller
+   2.9 Recurring Billing Engine & Automated Batch Processor
+   2.10 Invoices Registry & Financial State Machine
+   2.11 Payments Processing & Balance Reconciliation
+   2.12 Team Roster & Administrative Accounts Provisioning
+   2.13 Financial Reports & Executive Metrics
+
+3. STAFF PANEL (/staff)
+   3.1 Operational Scope & Boundary Enforcement
+   3.2 Daily Operations Overview Dashboard
+   3.3 Customer Directory & CRM Management
+   3.4 Quotations Workflow & Customer Proposal Engine
+   3.5 Idempotent Quotation-to-Subscription Conversion
+   3.6 Active Subscriptions Handling & Status Actions
+   3.7 Customer Invoices Review & Confirmation
+   3.8 Payment Collection & Receipt Recording
+   3.9 Staff Operational Reporting & Follow-Up
+   3.10 Staff Profile & Session Settings
+
+4. CUSTOMER PORTAL (/portal)
+   4.1 Security Isolation & Multi-Tenant Data Boundaries
+   4.2 Customer Dashboard & Subscription Summary
+   4.3 Personal Subscriptions Directory & Detail View
+   4.4 Self-Service Lifecycle Operations (Pause, Resume, Renew)
+   4.5 Invoices Registry & Payment History
+   4.6 Printable & PDF-Ready Official Tax Invoices
+   4.7 Customer Account Profile & Security Settings
 
 ================================================================================
-1. SYSTEM ROLE ARCHITECTURE & DATA BOUNDARY MODEL
+1. AUTHENTICATION & LOGIN SYSTEM
 ================================================================================
 
-The Brightloop Software system is structured into three distinct user tiers:
+1.1 Architecture & Role-Based Access Control (RBAC)
+---------------------------------------------------
+- Modular monolith user authentication powered by Supabase Auth with server-side cookie sessions (SSR) using `@supabase/ssr`.
+- Three strictly partitioned user roles defined in `public.user_role` database enum:
+  * 'admin': Unrestricted administrative authority over catalog, plans, rules, team, and billing.
+  * 'staff': Operational handling of customers, quotes, subscriptions, invoices, and payments.
+  * 'customer': Self-service access strictly isolated to their own subscriptions and invoices.
+- Database trigger `handle_new_user()` automatically executes on `auth.users` insert, creating a row in `public.profiles` defaulting to the 'customer' role to eliminate unauthorized privilege escalation.
 
-1. ADMIN (Executive & System Management):
-   - Unrestricted access across the entire platform.
-   - Exclusive control over global configurations: Products, Plans, Tax Rules, 
-     Discount Rules, Staff Team Provisioning, and Executive Financial Reports.
-   - Master authority over all customer subscriptions, billing cycles, invoices, 
-     and payment reconciliation.
+1.2 Public Customer Authentication & Registration Flow
+------------------------------------------------------
+- Route: /signup
+  * Captures Customer Full Name, Email Address, and Password.
+  * Real-time client-side password policy validator and server-side verification before auth account creation.
+  * Automatically provisions customer profile in `public.profiles` linked to Supabase user ID.
+  * Dispatches confirmation and redirects customer to portal onboarding.
+- Route: /login
+  * Dedicated sign-in for external business customers.
+  * Validates credentials and verifies user role in `public.profiles`.
+  * Redirects legitimate customers directly to /portal.
+  * Strictly blocks staff or admin accounts attempting customer login, rerouting them to /internal-login.
 
-2. STAFF / INTERNAL STAFF (Operations & Sales Handling):
-   - Designed for daily operational employees (sales, support, billing clerks).
-   - Manages customer relationships, quotation generation, quotation conversion, 
-     subscription monitoring, manual lifecycle changes, invoice delivery, and 
-     payment collection recording.
-   - RESTRICTED from modifying global tax rules, global discount rules, recurring 
-     plan policies, company catalog pricing, and staff user administration.
+1.3 Internal Staff & Admin Unified Login Flow
+---------------------------------------------
+- Route: /internal-login
+  * Single, unified authentication page featuring an interactive tabbed card:
+    - [Admin Tab]: Designed for business owners and system administrators.
+    - [Internal Staff Tab]: Designed for operational team members.
+  * Smart Identifier Recognition:
+    - Supports login using full email addresses or shorthand system usernames.
+    - Admin shorthand accounts recognized:
+      1. 'shivanshu' / 'shivanshu@brightloopsoftware.com' (Admin: Shivanshu)
+      2. 'aryan' / 'aryan@brightloopsoftware.com' (Admin: Aryan)
+      3. 'hiren' / 'hirensir' / 'hiren@brightloopsoftware.com' (Admin: Hiren Sir)
+      4. 'admin' / 'admin@brightloopsoftware.com' (Default System Administrator)
+    - Staff shorthand accounts recognized:
+      1. 'staff' / 'staff@brightloopsoftware.com'
+      2. 'alex.ops' / 'alex.ops@brightloopsoftware.com'
+      3. 'james.ops' / 'james.ops@brightloopsoftware.com'
+  * Automatic Cross-Tab Role Destination Routing:
+    - If an administrator signs in via the Staff tab, the system recognizes their role and directs them to /admin.
+    - If a staff member signs in via the Admin tab, the system enforces boundaries and routes them to /staff.
+  * UI Navbar Entry Point:
+    - The public navigation bar features a distinct "Staff Login" button linking directly to /internal-login.
 
-3. CUSTOMER (External Subscriber):
-   - Self-service access through the Customer Portal.
-   - Strict customer-level data isolation: A customer can ONLY view and interact 
-     with their own subscriptions, invoices, and profile. Cross-customer access 
-     is blocked at both the API layer and the PostgreSQL Row-Level Security (RLS) layer.
-   - May execute permitted lifecycle actions (pause, resume, renew) only when 
-     allowed by the underlying subscription plan policy.
+1.4 Password Security & Strength Engine
+---------------------------------------
+- Implemented in `src/modules/auth/validation.ts`.
+- Enforces enterprise credential criteria:
+  * Minimum length > 8 characters.
+  * At least one uppercase character (A-Z).
+  * At least one lowercase character (a-z).
+  * At least one special symbol (!@#$%^&*()_+-=[]{}|;:,.<>?).
+- Password validation component provides live visual cues (checkmark / cross) on active input.
 
-================================================================================
-2. ADMIN PANEL FUNCTIONALITY (FULL SYSTEM MANAGEMENT)
-================================================================================
-Base URL: /admin
-Authentication: Requires authenticated session with role = 'admin'.
-Theme Support: Seamless Dark Mode (#000000 canvas) and Light Mode (#fafafa canvas).
+1.5 Password Recovery & Reset Flow
+----------------------------------
+- Route: /forgot-password
+  * Accepts registered user email address.
+  * Generates and transmits secure password reset token via email.
+  * Displays confirmation card with instructions to check inbox.
+- Route: /reset-password
+  * Validates token payload from URL hash / session.
+  * Enforces standard password strength rules on new password entry.
+  * Updates Supabase Auth credentials and confirms success with direct login link.
 
---------------------------------------------------------------------------------
-2.1 Header, Global Navigation & Shell Controls
---------------------------------------------------------------------------------
-- Admin Navigation Sidebar: Direct 1-click access to all 12 operational modules.
-- Global Search Bar: Real-time search across customers, subscriptions, quotations, 
-  and invoices with instant keyboard navigation.
-- System Operational Pill: Real-time status indicator ("OPS READY").
-- Universal Theme Toggle: 1-click switcher between Geist Dark and Light themes.
-- Session Profile & Sign Out: Displays active administrator name and credentials.
+1.6 Session Management & Route Protection Middleware
+----------------------------------------------------
+- Handled at Next.js edge runtime via `src/middleware.ts` and `src/lib/supabase/middleware.ts`.
+- Route Boundary Matrix:
+  * /admin/*   -> Allowed: 'admin' only. Blocked: Redirects to /internal-login.
+  * /staff/*   -> Allowed: 'admin', 'staff'. Blocked: Redirects to /internal-login.
+  * /portal/*  -> Allowed: 'customer' only. Blocked: Redirects to /login.
+  * Public (/, /login, /signup, /internal-login, /forgot-password) -> Accessible to all.
 
---------------------------------------------------------------------------------
-2.2 Executive Overview Dashboard (/admin)
---------------------------------------------------------------------------------
-- Real-Time Primary KPI Cards:
-  1. Active Subscriptions: Live recurring count, trend badge (+12.0%), and interactive 
-     emerald SVG sparkline graph.
-  2. Revenue Received: Total reconciled cashflow collected, trend badge (+18.4%), and 
-     interactive sky-blue SVG sparkline graph.
-  3. Outstanding Amount: Unpaid confirmed receivables, trend badge (-3.1%), and 
-     interactive amber SVG sparkline graph.
-  4. Overdue Invoices: Count and total monetary value of past-due receivables, alert badge 
-     ("Requires action"), and interactive rose SVG sparkline graph.
-- Interactive Sparkline Graph Engine:
-  - Responsive SVG vector curves displaying 6-month historical trajectories.
-  - Interactive hover node points displaying date, monetary/count value, and trend tags.
-- Direct Operational Quick Actions:
-  - "Process Billing": Instantly triggers the automated recurring billing engine.
-  - "+ New Quote": Quick shortcut to create an enterprise quotation.
-- Contextual Operational Intelligence Panels:
-  - Overdue Invoices Priority List: Lists overdue accounts with due dates, amounts, and 
-    direct links to invoice settlement.
-  - Active Subscriptions Panel: Live monitor of active recurring accounts and next billing dates.
-  - Recent Subscriptions Feed: Newly created and converted subscriptions with status badges.
-  - Recent Payments Received Feed: Audit trail of recent incoming cashflow transactions.
-
---------------------------------------------------------------------------------
-2.3 Product Catalog Management (/admin/products, /admin/products/new, /admin/products/[id])
---------------------------------------------------------------------------------
-- Product Directory: View all company products, SKU codes, descriptions, and base prices.
-- Product Creation: Add new data analysis products or service packages.
-  - Fields: Product Name, SKU/Code, Description, Base Unit Price, Active Status.
-- Brand Variants Engine:
-  - Configure multi-tiered product variants (e.g. Starter, Pro, Enterprise, High-Memory).
-  - Price Adjustments: Set positive or negative price deltas (+/- $) per variant.
-- Product Modification: Edit pricing, description, active status, and brand variants.
-
---------------------------------------------------------------------------------
-2.4 Subscription Plans & Lifecycle Policies (/admin/plans, /admin/plans/new, /admin/plans/[id])
---------------------------------------------------------------------------------
-- Plan Catalog: View recurring billing plans, pricing, cadences, and policy settings.
-- Plan Creation: Define recurring subscription packages.
-  - Recurrence Cadences: Weekly, Monthly, or Yearly billing periods.
-  - Pricing & Seats: Base plan fee and minimum seat/license commitments.
-  - Contract Validity: Set effective start date and expiration date window.
-- Policy Rules & Restrictions Configuration:
-  1. Auto-Close: Automatically terminates the subscription when the expiry date passes.
-  2. Early Close Eligible: Permits internal staff or customers to terminate before term ends.
-  3. Pause Eligible: Authorizes temporary suspension of billing without contract cancellation.
-  4. Renewal Eligible: Authorizes contract renewal and continuation into new periods.
-- Plan Modification: Adjust plan pricing, seat minimums, and lifecycle policy flags.
-
---------------------------------------------------------------------------------
-2.5 Tax Configuration (/admin/taxes, /admin/taxes/new)
---------------------------------------------------------------------------------
-- Tax Rules Directory: View all configured tax rates and regional jurisdictions.
-- Tax Creation: Add regional tax rules (e.g. GST 18%, VAT 20%, State Sales Tax 8.25%).
-  - Fields: Tax Name, Rate Percentage (%), Country/Jurisdiction, Description.
-- Default Tax Assignment: Set the default tax rule automatically applied to new quotations.
-- Status Toggle: Enable or disable specific tax rules.
-
---------------------------------------------------------------------------------
-2.6 Discount Rules Engine (/admin/discounts, /admin/discounts/new)
---------------------------------------------------------------------------------
-- High-Density Discount Rules Directory: Minimalist, information-dense table for rapid scanning.
-- Discount Rule Creation:
-  - Discount Identification: Promo Code and internal title.
-  - Discount Type & Value: Percentage discount (%) or Fixed Amount discount ($).
-  - Eligibility Conditions:
-    * Minimum Order Amount threshold ($).
-    * Minimum Seat/Quantity threshold.
-  - Applicability Scope: Universal ("All subscriptions") vs Product-specific applicability.
-  - Usage Limits & Quotas: Maximum allowable redemptions (e.g. 100 uses) and live usage counter.
-  - Validity Schedule: Single-line start date and expiration date window.
-- Discount Evaluation Engine: Validates cart/quotation conditions before applying discounts.
-
---------------------------------------------------------------------------------
-2.7 Standardized Quotation Templates (/admin/quotation-templates, /admin/quotation-templates/new)
---------------------------------------------------------------------------------
-- Templates Library: Browse reusable pre-configured package configurations.
-- Template Creation: Pre-select plan, standard line items, default quantities, payment terms, 
-  and validity duration to accelerate sales staff quote generation.
-
---------------------------------------------------------------------------------
-2.8 Quotations & Sales Management (/admin/quotations, /admin/quotations/new, /admin/quotations/[id])
---------------------------------------------------------------------------------
-- Master Quotations List: Filter by status (draft, sent, confirmed, expired, cancelled).
-- Quotation Creation:
-  - Customer selection and recurring plan binding.
-  - Multi-line item editor: product selection, quantity, and brand variant adjustments.
-  - Automatic tax rate application and promotional discount code validation.
-  - Payment terms (Net 15, Net 30, Due on Receipt) and quotation validity period.
-- Quotation Actions & Conversion:
-  - Confirm Quotation: Locks quotation terms for customer acceptance.
-  - Convert to Subscription: Converts confirmed quote directly into an active subscription.
-  - Idempotency Protection: Prevents duplicate subscriptions if conversion is triggered repeatedly.
-  - Expiration Guard: Automatically rejects conversion attempts on expired quotations.
-
---------------------------------------------------------------------------------
-2.9 Master Subscription Operations (/admin/subscriptions, /admin/subscriptions/new, /admin/subscriptions/[id])
---------------------------------------------------------------------------------
-- Subscriptions Registry: Filter by lifecycle status (draft, confirmed, active, paused, closed, expired).
-- Subscription Detail View: Complete record showing customer profile, plan terms, line items, 
-  recurring cadence, next billing date, and financial commitment.
-- Master Lifecycle State Transitions:
-  - Activate: Transitions confirmed subscription into live recurring status.
-  - Pause: Temporarily halts recurring billing (verifies plan pause_eligible policy).
-  - Resume: Reactivates paused subscription back to active billing.
-  - Early Close / Terminate: Closes subscription immediately (verifies early_close_eligible policy).
-  - Manual Renew: Advances next billing cycle date and extends subscription period.
-
---------------------------------------------------------------------------------
-2.10 Automated Recurring Billing Engine (/admin/billing)
---------------------------------------------------------------------------------
-- Billing Engine Controller: Manages scheduled and manual invoice generation runs.
-- Recurring Billing Capabilities:
-  - Scans all active subscriptions where next_billing_date <= today.
-  - Auto-Close Processing: Evaluates subscriptions with auto_close=true and terminates expired ones.
-  - Automated Invoice Creation: Generates confirmed invoices with unique sequential numbering (INV-2026-XXX).
-  - Next Billing Date Advancement: Automatically rolls the billing date forward (e.g. +1 month).
-  - Idempotency & Duplicate Prevention: Guarantees 0 duplicate invoices if run multiple times.
-  - Audit Execution Log: Displays processed subscriptions count, invoices generated, and expired closures.
-
---------------------------------------------------------------------------------
-2.11 Invoices & Accounts Receivable (/admin/invoices, /admin/invoices/[id], /admin/invoices/[id]/print)
---------------------------------------------------------------------------------
-- Invoices Directory: Filter by status (draft, confirmed, paid, cancelled, overdue).
-- Invoice Details: Subtotal, applied tax breakdown, discount savings, total, amount paid, and amount due.
-- State Machine Enforcement:
-  - Confirm draft invoice to lock amounts for payment.
-  - Cancel unpaid invoice (locks record from further payment collection).
-  - Strict Paid Guard: Direct status changes to 'paid' are strictly blocked; invoices can ONLY 
-    reach 'paid' status through verified payment reconciliation.
-- Official Printable Tax Invoice: Formatted print-optimized layout with tax details and line items.
-
---------------------------------------------------------------------------------
-2.12 Payment Collection & Cashflow Reconciliation (/admin/payments, /admin/payments/new)
---------------------------------------------------------------------------------
-- Payment Transaction Audit: Complete journal of all historical payments (PAY-2026-XXX).
-- Payment Recording:
-  - Bind payment to specific confirmed invoice.
-  - Supported Payment Methods: Bank Transfer, Credit Card, UPI, Cheque, Cash.
-  - Overpayment Validation: Rejects payment amounts exceeding the remaining invoice balance due.
-  - Automated Balance Settle: When amount_due reaches $0, invoice status automatically transitions to 'paid'.
-
---------------------------------------------------------------------------------
-2.13 Executive Financial Intelligence & Reporting (/admin/reports)
---------------------------------------------------------------------------------
-- Executive SaaS Metrics:
-  - Monthly Recurring Revenue (MRR) & Annual Recurring Revenue (ARR).
-  - Total Revenue Received vs Total Outstanding Receivables.
-  - Active Subscriber Base & Churn Rate Analysis.
-  - Customer Lifetime Value (LTV) projections.
-- Revenue Breakdown by Product & Plan: Financial performance across data analysis tiers.
-- Cashflow Reconciliation Audits: Strict verification comparing payment transactions to ledger entries.
-
---------------------------------------------------------------------------------
-2.14 Team & Staff User Administration (/admin/team, /admin/team/new)
---------------------------------------------------------------------------------
-- Team Roster: List of all internal administrative and operational personnel.
-- Staff Provisioning: Create new staff accounts with assigned roles (admin vs staff).
-- Access Control: Deactivate staff access or update internal responsibilities.
-- Primary Administrators: Provisioned accounts for Shivanshu, Aryan, and Hiren Sir.
-
---------------------------------------------------------------------------------
-2.15 Customer CRM Directory (/admin/customers, /admin/customers/[id])
---------------------------------------------------------------------------------
-- Master Customer Directory: View all registered customer organizations.
-- Customer Detail Dossier: Contact information, billing address, total lifetime spend, 
-  active subscriptions list, and complete historical invoice ledger.
-
---------------------------------------------------------------------------------
-2.16 Admin Profile & Security (/admin/account)
---------------------------------------------------------------------------------
-- Account Session Details: Active user identifier, authenticated role ('admin'), and security settings.
 
 ================================================================================
-3. STAFF PANEL FUNCTIONALITY (DAILY OPERATIONS & SALES EXECUTION)
-================================================================================
-Base URL: /staff
-Authentication: Requires authenticated session with role = 'staff' (or 'admin').
-Theme Support: Full Geist Dark Mode and Light Mode support.
-
---------------------------------------------------------------------------------
-3.1 Operational Scope & Boundary Constraints
---------------------------------------------------------------------------------
-- The Staff workspace is built for internal employees handling daily business operations.
-- REUSES the exact same backend logic, database records, calculations, and modules as Admin.
-- RESTRICTIONS ENFORCED:
-  * CANNOT create, edit, or delete Products and Brand Variants.
-  * CANNOT create, edit, or delete Subscription Plans and Policy Flags.
-  * CANNOT create or alter Tax Rules.
-  * CANNOT create or alter Discount Rules.
-  * CANNOT provision or modify internal Staff accounts.
-  * CANNOT alter core business configuration.
-
---------------------------------------------------------------------------------
-3.2 Operational Dashboard (/staff)
---------------------------------------------------------------------------------
-- Daily Operational Metrics:
-  1. Active Subscriptions Managed.
-  2. Quotations Awaiting Follow-Up / Conversion.
-  3. Pending Invoices Awaiting Payment Collection.
-  4. Today's Recorded Payment Collections ($).
-- Quick Action Buttons:
-  - "+ New Quotation": Start a customer deal.
-  - "Record Payment": Log received funds against an invoice.
-  - "View Customers": Access CRM records.
-- Action Items Feed: Prioritized operational alerts (overdue customer balances, quotes expiring soon).
-
---------------------------------------------------------------------------------
-3.3 Customer Management & CRM (/staff/customers, /staff/customers/[id])
---------------------------------------------------------------------------------
-- Customer Search: Search customers by company name, contact person, or email.
-- Customer Operational Dossier:
-  - View customer contact details, phone, and billing address.
-  - View all subscriptions belonging to the customer.
-  - View all customer invoices and outstanding balances.
-  - Quick action: "Create Quotation for Customer".
-
---------------------------------------------------------------------------------
-3.4 Sales & Quotations Workflow (/staff/quotations, /staff/quotations/new, /staff/quotations/[id])
---------------------------------------------------------------------------------
-- Quotations List: Monitor quotation statuses (draft, sent, confirmed, expired).
-- Quotation Preparation:
-  - Select customer from directory.
-  - Select pre-configured subscription plan.
-  - Add product lines, set seat quantities, and select brand variants.
-  - Apply valid promotional discount codes (system validates eligibility rules automatically).
-  - System applies standard tax rates automatically.
-  - Specify quotation validity duration and payment terms.
-- Quotation Actions:
-  - Mark Quotation as Sent to customer.
-  - Confirm Quotation upon customer agreement.
-  - Convert to Subscription: Converts confirmed quote into an active subscription with zero duplication.
-
---------------------------------------------------------------------------------
-3.5 Subscription Operations (/staff/subscriptions, /staff/subscriptions/[id])
---------------------------------------------------------------------------------
-- Subscription Monitoring: View all customer subscriptions with status indicators.
-- Subscription Operational Actions:
-  - Inspect subscription details, linked quotation, line items, and next billing date.
-  - Pause Subscription: Temporarily suspend an active subscription upon customer request 
-    (strictly enforced: allowed only if plan pause_eligible is true).
-  - Resume Subscription: Reactivate a paused subscription.
-  - Close Subscription: Process customer cancellation request (allowed only if early_close_eligible is true).
-  - Renew Subscription: Extend customer agreement into next billing term.
-
---------------------------------------------------------------------------------
-3.6 Invoice Management & Delivery (/staff/invoices, /staff/invoices/[id], /staff/invoices/[id]/print)
---------------------------------------------------------------------------------
-- Invoices Tracking: View confirmed, paid, and overdue invoices across all customers.
-- Invoice Actions:
-  - Inspect invoice balance due and payment history.
-  - Mark invoice as sent to customer.
-  - Open Printable Invoice: Generate official PDF/print tax invoice for customer dispatch.
-
---------------------------------------------------------------------------------
-3.7 Payment Collection Recording (/staff/payments, /staff/payments/new)
---------------------------------------------------------------------------------
-- Payment Journal: View all historical payment entries.
-- Record Customer Payment:
-  - Select confirmed invoice with outstanding balance.
-  - Enter collected amount, payment date, and transaction reference.
-  - Select payment method: Bank Transfer, Credit Card, Cheque, UPI, or Cash.
-  - Add payment notes and deposit reference.
-  - Validation: System prevents overpayments exceeding remaining balance.
-  - Real-Time Reconciliation: Invoice automatically updates amount_paid and marks as 'paid' upon full settlement.
-
---------------------------------------------------------------------------------
-3.8 Operational Reporting (/staff/reports)
---------------------------------------------------------------------------------
-- Operational Metrics:
-  - Quotation conversion pipeline (draft -> confirmed -> active subscription).
-  - Invoice collection efficiency (paid vs outstanding receivables).
-  - Active subscriber retention metrics.
-
---------------------------------------------------------------------------------
-3.9 Staff Account Settings (/staff/account)
---------------------------------------------------------------------------------
-- Staff Credentials: View personal profile, assigned operational role ('staff'), and security settings.
-
-================================================================================
-4. CUSTOMER PORTAL FUNCTIONALITY (SELF-SERVICE & ISOLATION)
-================================================================================
-Base URL: /portal
-Authentication: Requires authenticated session with role = 'customer'.
-Data Security: STRICT CUSTOMER DATA ISOLATION.
-Customers can NEVER view or access another customer's records. All queries, APIs, and 
-pages strictly filter by the authenticated customer's ID.
-
---------------------------------------------------------------------------------
-4.1 Customer Portal Shell & Navigation
---------------------------------------------------------------------------------
-- Clean Customer Navbar: Links to Overview, Subscriptions, Invoices, and Account.
-- Mobile Responsive Drawer: Optimized for mobile and tablet browsing.
-- Theme Switcher: Allows customer to toggle between Dark Mode and Light Mode.
-- Sign Out Action: Securely terminates customer session.
-
---------------------------------------------------------------------------------
-4.2 Customer Overview (/portal)
---------------------------------------------------------------------------------
-- Account Summary Cards:
-  1. Active Subscriptions: Number of current active recurring services.
-  2. Next Scheduled Billing Date: Next upcoming renewal date.
-  3. Outstanding Amount Due: Total unpaid balance across confirmed invoices.
-- Quick Actions & Payment Alerts:
-  - Prominent alert banner if invoices are pending payment.
-- Recent Invoices Table: Quick access to recent invoices with status pills and printable views.
-- Active Subscriptions Card: Quick status check on current software access.
-
---------------------------------------------------------------------------------
-4.3 Customer Subscriptions (/portal/subscriptions, /portal/subscriptions/[id])
---------------------------------------------------------------------------------
-- Subscriptions List: View all personal subscriptions with current status badges.
-- Subscription Detail View:
-  - Plan name, billing frequency (weekly, monthly, yearly), start date, and next renewal date.
-  - Itemized product breakdown, seat counts, and total recurring cost.
-  - Linked quotation reference and payment terms.
-- Permitted Self-Service Lifecycle Operations (Policy Enforced):
-  1. Pause Subscription:
-     - Customer can temporarily pause their own active subscription.
-     - POLICY CHECK: If plan pause_eligible is false, button is disabled and customer 
-       is informed that plan terms do not permit self-service pausing.
-  2. Resume Subscription:
-     - Customer can resume a previously paused subscription back to active status.
-  3. Renew Subscription:
-     - Customer can proactively renew subscription (advances next billing date) 
-       if renewal_eligible is true.
-  4. Strict Data Isolation: Querying another customer's subscription ID returns a 404/null 
-     response, preventing unauthorized data enumeration.
-
---------------------------------------------------------------------------------
-4.4 Customer Invoices & Billing History (/portal/invoices, /portal/invoices/[id], /portal/invoices/[id]/print)
---------------------------------------------------------------------------------
-- Personal Invoices Ledger: Complete billing history for the customer.
-- Invoice Filters: Filter personal invoices by All, Paid, Confirmed, and Outstanding.
-- Invoice Detail View:
-  - Invoice number, issue date, and payment due date.
-  - Line items breakdown: product description, quantity, unit price, and subtotal.
-  - Applied discounts and regional tax calculations.
-  - Total amount, amount paid to date, and remaining balance due.
-  - Status Indicators: Paid (emerald), Confirmed / Due (amber), Overdue (rose).
-  - Payment Audit History: List of all payments recorded against this invoice with date and method.
-- Official Printable Tax Invoice (/portal/invoices/[id]/print):
-  - Print-ready tax invoice formatted for business accounting and reimbursement claims.
-- Strict Data Isolation: Querying an invoice belonging to another customer returns 404/null.
-
---------------------------------------------------------------------------------
-4.5 Customer Account & Security (/portal/account)
---------------------------------------------------------------------------------
-- Profile Information: View registered name, company name, email address, phone, and billing address.
-- Password Security:
-  - Update password self-service.
-  - Interactive Password Strength Validator: Enforces >8 characters, at least 1 uppercase letter, 
-    at least 1 lowercase letter, and at least 1 special character in real-time.
-
-================================================================================
-5. COMPARATIVE FEATURE & PERMISSION MATRIX
+2. ADMIN PANEL (/admin)
 ================================================================================
 
-Feature / Capability                     Admin Panel   Staff Panel   Customer Portal
---------------------------------------------------------------------------------
-View Overview Dashboard                      YES           YES             YES
-View Interactive Sparkline KPI Graphs        YES           NO              NO
-Configure Products & Brand Variants          YES           NO              NO
-Configure Subscription Plans & Policies      YES           NO              NO
-Configure Tax Rules                          YES           NO              NO
-Configure Discount Rules                     YES           NO              NO
-Manage Quotation Templates                   YES           NO              NO
-Create & Edit Customer Quotations            YES           YES             NO
-Confirm Quotations                           YES           YES             NO
-Convert Quotation to Subscription            YES           YES             NO
-View All Subscriptions (Global)              YES           YES             NO (Own Only)
-Pause / Resume Subscriptions                 YES           YES             YES (If Allowed)
-Close / Terminate Subscriptions Early        YES           YES             NO
-Trigger Automated Recurring Billing Engine   YES           NO              NO
-View All Invoices (Global)                   YES           YES             NO (Own Only)
-Confirm / Cancel Invoices                    YES           YES             NO
-View & Print Official Tax Invoices           YES           YES             YES (Own Only)
-Record Payment Collections                   YES           YES             NO
-Reconcile Invoices to 'Paid'                 YES           YES             NO
-Executive Financial Reports (MRR, ARR, LTV)  YES           NO              NO
-Operational Sales Pipeline Reports           YES           YES             NO
-Manage Staff Accounts & RBAC                 YES           NO              NO
-Access Customer Directory (CRM)              YES           YES             NO
-Manage Personal Profile & Password           YES           YES             YES
-Dark & Light Theme Mode                      YES           YES             YES
+2.1 Overview Dashboard & Operational Intelligence
+-------------------------------------------------
+- Route: /admin
+- Features Geist design tokens: 24px headings with -0.4px tracking, hairline borders, and dark/light themes.
+- High-Fidelity SVG Sparkline KPI Cards:
+  1. Active Subscriptions: Displays current active recurring count, emerald SVG sparkline, and +12.0% trajectory.
+  2. Revenue Received: Displays cumulative settled revenue, sky-blue SVG sparkline, and +18.4% trajectory.
+  3. Outstanding Amount: Displays pending receivables, amber oscillation SVG sparkline, and -3.1% trajectory.
+  4. Overdue Invoices: Displays overdue invoice count and amount, rose alert SVG sparkline, and 'Requires action' badge.
+- Interactive Sparkline Floating Tooltips:
+  * Hovering over sparkline data nodes reveals floating tooltip displaying exact date, recorded value, and color dot.
+- Quick Operational Controls:
+  * [Process Billing] Button: Triggers immediate batch run of the recurring billing engine.
+  * [+ New Quote] Button: Direct shortcut to quotation creation workflow.
+- Live Operational Panels:
+  * Overdue Invoices: Priority list of unpaid invoices past due date with direct settlement links.
+  * Active Subscriptions: Live contracts breakdown with billing cadence and next billing dates.
+  * Recent Subscriptions: Newly converted customer contracts with status badges.
+  * Recent Payments Received: Real-time ledger of settled cashflow transactions.
+
+2.2 Product & Service Catalog Management
+----------------------------------------
+- Routes: /admin/products, /admin/products/new, /admin/products/[id]
+- Functions:
+  * Create, view, update, and archive products and data services.
+  * Define unique Product Code, Product Name, Category, and Base Sales Price.
+  * Product Variants & Brand Pricing Adjustments:
+    - Configure brand-specific or tier-specific variants (e.g., Enterprise Edition, Lite Edition).
+    - Attach fixed or percentage price adjustments (+/-) to base product price.
+  * Manage product status (Active / Inactive) to control quotation availability.
+
+2.3 Subscription Plans & Cadence Configuration
+----------------------------------------------
+- Routes: /admin/plans, /admin/plans/new, /admin/plans/[id]
+- Functions:
+  * Define recurring contract blueprints and billing frequencies:
+    - Daily, Weekly, Monthly, Quarterly, Semi-Annual, Yearly.
+  * Configure Lifecycle Policy Flags:
+    - Auto-close: Automatically closes expired subscriptions during automated billing runs.
+    - Early-close eligible: Grants permission for premature contract cancellation.
+    - Pause eligible: Permits customers or staff to temporarily freeze billing periods.
+    - Renewal eligible: Allows contracts to be renewed upon reaching term expiration.
+  * Define minimum quantity / seat commitments (e.g., minimum 5 seats required).
+  * Assign base subscription pricing and description notes.
+
+2.4 Tax Rules & Calculation Modes
+---------------------------------
+- Routes: /admin/taxes, /admin/taxes/new
+- Functions:
+  * Create and manage state, federal, or regional tax definitions (e.g., VAT, GST, Sales Tax).
+  * Configure Tax Rate (e.g., 5.0%, 10.0%, 18.0%).
+  * Tax Calculation Mode:
+    - Exclusive Mode: Tax calculated on top of line-item subtotal (Subtotal * (1 + Tax%)).
+    - Inclusive Mode: Tax embedded within product price (Tax extracted from gross total).
+  * Compounding Tax Support: Option to apply tax on top of previously calculated tax tiers.
+  * Scope: Global application across all catalog items or scoped to specific product categories.
+
+2.5 Discount Rules & Information-Dense Policy Engine
+----------------------------------------------------
+- Routes: /admin/discounts, /admin/discounts/new
+- Functions:
+  * Information-dense admin interface with streamlined scanning (no redundant text).
+  * Discount Types: Percentage discounts (e.g., 15%) or Fixed monetary amounts (e.g., $200).
+  * Multi-Tier Eligibility Rules:
+    - Minimum subtotal expenditure requirement (e.g., "$1,000 min.").
+    - Minimum seat / license count requirement (e.g., "5 seats min.").
+  * Scope Applicability: Scoped to "All subscriptions" or restricted to specific catalog items.
+  * Redemption Limits & Usage Tracking: Tracks total allowable redemptions (e.g., "12 / 100").
+  * Validity Date Windows: Single-line start and expiry date validation.
+
+2.6 Quotation Templates & Blueprint Engine
+------------------------------------------
+- Routes: /admin/quotation-templates, /admin/quotation-templates/new
+- Functions:
+  * Standardized contract blueprints to accelerate staff quoting.
+  * Pre-populate standard product line items, default quantities, and pre-selected plans.
+  * Attach default payment terms (e.g., Immediate, Net 15, Net 30, Net 60).
+  * Configure default quotation validity periods (e.g., 15 days, 30 days).
+
+2.7 Quotations Administration & Approval
+----------------------------------------
+- Routes: /admin/quotations, /admin/quotations/new, /admin/quotations/[id]
+- Functions:
+  * Complete repository of all quotations created across all customers and sales reps.
+  * Status Filter: Draft, Sent, Confirmed, Expired, Cancelled.
+  * Review financial totals, tax breakdowns, applied discounts, and net payable.
+  * Direct administrative conversion of approved quotations into active recurring subscriptions.
+
+2.8 Subscriptions Administration & Lifecycle Controller
+-------------------------------------------------------
+- Routes: /admin/subscriptions, /admin/subscriptions/new, /admin/subscriptions/[id]
+- Functions:
+  * Unified subscription ledger across the entire company.
+  * Status Filter: Draft, Confirmed, Active, Paused, Closed.
+  * Lifecycle State Machine Transitions:
+    - Confirm: Approves draft contract.
+    - Activate: Commences recurring billing cycle.
+    - Pause: Suspends billing progression and invoice generation.
+    - Resume: Restores paused contract back to active status.
+    - Close: Terminates subscription upon expiration or customer request.
+  * Review line items, next billing dates, terms, and connected invoice history.
+
+2.9 Recurring Billing Engine & Automated Batch Processor
+--------------------------------------------------------
+- Route: /admin/billing
+- Functions:
+  * Centralized billing engine executing scheduled recurring subscription charges.
+  * Automated Detection: Scans all subscriptions in 'active' status where `next_billing_date <= today`.
+  * Invoice Generation:
+    - Generates new confirmed tax invoice for each eligible subscription.
+    - Advances subscription `next_billing_date` forward by cadence interval (e.g., +1 month).
+  * Critical Duplicate Prevention & Idempotency:
+    - Detects whether an invoice has already been generated for the current billing window.
+    - Executing billing multiple times on the same date creates 0 duplicate invoices.
+  * Auto-Close Expiration Handler:
+    - Automatically closes expired subscriptions if `auto_close = true` and `expiry_date <= today`.
+  * Real-time Execution Dashboard:
+    - Summarizes processed contracts, invoices created, duplicates prevented, and contracts closed.
+
+2.10 Invoices Registry & Financial State Machine
+------------------------------------------------
+- Routes: /admin/invoices, /admin/invoices/[id], /admin/invoices/[id]/print
+- Functions:
+  * Comprehensive invoice repository tracking all draft, confirmed, paid, overdue, and cancelled bills.
+  * State Machine Rule Enforcement:
+    - Draft -> Confirmed -> Paid or Cancelled.
+    - Direct status update to 'paid' via status dropdown is strictly blocked by the system;
+      invoices can only reach 'paid' status through an authentic, recorded payment transaction.
+  * Invoice Details: Line items, product variants, tax breakdown, discount deduction, balance due.
+  * Printable Tax Invoice: Clean, formal printable layout for accounting dispatch or physical export.
+
+2.11 Payments Processing & Balance Reconciliation
+-------------------------------------------------
+- Routes: /admin/payments, /admin/payments/new
+- Functions:
+  * Administrative payment entry against any confirmed invoice with outstanding balance.
+  * Payment Methods: Bank Transfer, Credit Card, Cheque, Cash, Online Gateway.
+  * Strict Financial Validation:
+    - Rejects payment amounts exceeding remaining balance (`amount > amount_due`).
+    - Rejects payment attempts against cancelled or draft invoices.
+  * Automated Balance Deduction:
+    - Reduces `amount_due` and increases `amount_paid`.
+    - Automatically transitions invoice status to 'paid' upon full balance settlement.
+  * Audit Trail: Issues immutable payment transaction records with `PAY-2026-` identifiers.
+
+2.12 Team Roster & Administrative Accounts Provisioning
+-------------------------------------------------------
+- Routes: /admin/team, /admin/team/new
+- Functions:
+  * Directory of all authorized internal personnel (Admins and Staff).
+  * Pre-Seeded Primary Admin Accounts:
+    1. Shivanshu (Full Name: Shivanshu, Email: shivanshu@brightloopsoftware.com, Role: Admin)
+    2. Aryan (Full Name: Aryan, Email: aryan@brightloopsoftware.com, Role: Admin)
+    3. Hiren Sir (Full Name: Hiren Sir, Email: hiren@brightloopsoftware.com, Role: Admin)
+  * Provisioning new staff members and assigning roles ('admin' or 'staff').
+  * Revoking or adjusting operational permissions.
+
+2.13 Financial Reports & Executive Metrics
+------------------------------------------
+- Route: /admin/reports
+- Functions:
+  * Executive financial health dashboard.
+  * Calculates Monthly Recurring Revenue (MRR) and Annual Run Rate (ARR).
+  * Total Revenue Received strictly reconciled against the sum of real recorded payments.
+  * Aging report of outstanding balances (Due in 30 days, 60 days, Overdue).
+  * Churn rate, active subscriber count, and lifetime customer value analytics.
+
 
 ================================================================================
-6. END-TO-END CROSS-SYSTEM WORKFLOWS & LIFECYCLE ENGINES
+3. STAFF PANEL (/staff)
 ================================================================================
 
-Workflow 1: Sales Deal to Active Subscription
-1. Admin configures product catalog, variants, subscription plans, taxes, and discounts.
-2. Staff creates a quotation for a customer selecting product packages, quantities, and promo codes.
-3. System automatically calculates line subtotals, tax amounts, and applies discounts.
-4. Staff confirms quotation and sends it to the customer.
-5. Staff converts quotation to subscription:
-   - System provisions subscription with unique number (SUB-2026-XXX).
-   - Subscription inherits lifecycle policies (auto_close, pause_eligible, early_close_eligible, renewal_eligible).
-   - Operation is idempotent: repeated clicks return existing subscription without duplication.
-6. Customer immediately sees the active subscription inside their Customer Portal.
+3.1 Operational Scope & Boundary Enforcement
+--------------------------------------------
+- The Staff panel provides daily operational tools while enforcing administrative restrictions:
+  * Staff CANNOT create, modify, or delete base Products, Plans, Taxes, Discounts, or Team members.
+  * Staff CAN create Customers, Quotations, Subscriptions, Invoices, and record Payments.
 
-Workflow 2: Recurring Billing Cycle & Invoicing
-1. Automated Billing Engine evaluates all active subscriptions where next_billing_date <= today.
-2. Auto-close check: Subscriptions past expiry_date with auto_close=true are closed immediately.
-3. System generates confirmed invoices (INV-2026-XXX) with correct line items, taxes, and due dates.
-4. Subscription next_billing_date is advanced to next recurring period.
-5. Repeated billing runs on the same day create 0 duplicate invoices (idempotent).
-6. Staff and Admin see generated invoices in operational receivables.
-7. Customer receives notification and sees invoice in their portal with payment due date.
+3.2 Daily Operations Overview Dashboard
+---------------------------------------
+- Route: /staff
+- Functions:
+  * Operational KPI cards focused on actionable daily tasks:
+    - Open Quotations awaiting customer signature.
+    - Active Subscriptions in progress.
+    - Unpaid Invoices requiring payment follow-up.
+    - Today's Payments collected.
+  * Quick Action Buttons:
+    - [+ Create Quotation]: Opens staff quote workflow.
+    - [Record Payment]: Rapid payment entry modal.
+    - [View Customers]: Access customer directory.
+  * Recent activity feed and prioritized overdue collections list.
 
-Workflow 3: Payment Collection & Balance Settlement
-1. Customer pays invoice via bank transfer, credit card, or offline payment.
-2. Staff or Admin navigates to Payments and records payment against the confirmed invoice.
-3. Validation prevents recording amounts greater than the remaining balance.
-4. System records payment transaction (PAY-2026-XXX) and deducts amount from invoice balance.
-5. When remaining balance reaches $0, invoice status automatically updates to 'paid'.
-6. Customer Portal immediately updates invoice status badge to Paid (emerald).
+3.3 Customer Directory & CRM Management
+---------------------------------------
+- Routes: /staff/customers, /staff/customers/[id]
+- Functions:
+  * Search, browse, and create customer records for commercial accounts.
+  * Customer Detail View:
+    - Commercial contact information, phone, billing address, and tax ID.
+    - Summary of all associated quotes, live subscriptions, and payment history.
+    - Total lifetime spend and current outstanding balance.
+  * Editing contact details and adding operational notes.
 
-Workflow 4: Customer Self-Service Lifecycle Operations
-1. Customer logs into Customer Portal and views their active subscription.
-2. Customer clicks "Pause Subscription":
-   - System checks subscription plan policy:
-     * If pause_eligible = true: Status changes to 'paused', billing pauses, success message shown.
-     * If pause_eligible = false: Action rejected with policy error message.
-3. Customer clicks "Resume Subscription":
-   - Paused subscription transitions back to 'active' status.
-4. Customer clicks "Renew Subscription":
-   - System verifies renewal_eligible flag and advances next billing period.
+3.4 Quotations Workflow & Customer Proposal Engine
+--------------------------------------------------
+- Routes: /staff/quotations, /staff/quotations/new, /staff/quotations/[id]
+- Functions:
+  * Prepare formal sales quotations for new or existing customers.
+  * Template Blueprints: Select existing quotation templates for instant pre-population.
+  * Dynamic Line-Item Builder:
+    - Add multiple products and services.
+    - Select brand variants with automatic price adjustments.
+    - Adjust seat counts and license quantities.
+  * Commercial Terms & Policies:
+    - Set payment terms (Net 15, Net 30, etc.) and validity duration.
+    - Apply authorized discount codes (system validates minimum subtotal & quantity conditions).
+    - Select applicable tax rules.
+  * Automatic Financial Totals: Calculates subtotal, discounts, taxes, and final quote total.
+  * Mark as 'Sent' for customer review.
+
+3.5 Idempotent Quotation-to-Subscription Conversion
+---------------------------------------------------
+- Available in: /staff/quotations/[id]
+- Functions:
+  * 1-Click "Convert to Subscription" button converts confirmed quotation into an active subscription.
+  * Critical Conversion Idempotency:
+    - Verifies whether a subscription has already been created for this quotation.
+    - Clicking the button repeatedly returns the existing subscription without generating duplicates.
+  * Expiration Protection: Prevents conversion of quotations past their validity expiry date.
+
+3.6 Active Subscriptions Handling & Status Actions
+--------------------------------------------------
+- Routes: /staff/subscriptions, /staff/subscriptions/[id]
+- Functions:
+  * Operational monitoring of recurring customer contracts.
+  * Inspect contract details, billing cadence, next invoice generation date, and product lines.
+  * Permitted Lifecycle Actions:
+    - Activate: Transition confirmed quote into active service.
+    - Pause: Pause service upon customer request (respects plan pause eligibility).
+    - Resume: Reactivate paused service.
+    - Early Close: Close subscription upon customer termination request (respects plan policy).
+
+3.7 Customer Invoices Review & Confirmation
+-------------------------------------------
+- Routes: /staff/invoices, /staff/invoices/[id], /staff/invoices/[id]/print
+- Functions:
+  * Review recurring billing statements generated by the system.
+  * Confirm draft invoices to make them payable.
+  * Printable Tax Invoice: Generate and print PDF-ready tax invoice for customer distribution.
+  * Cancel unpaid invoices upon cancellation of service.
+
+3.8 Payment Collection & Receipt Recording
+------------------------------------------
+- Routes: /staff/payments, /staff/payments/new
+- Functions:
+  * Record customer settlements received via wire transfer, credit card, cheque, or cash.
+  * Select target invoice from list of confirmed invoices with unpaid balance.
+  * Validates payment amount against remaining `amount_due`.
+  * Generates unique payment reference (`PAY-2026-XXXX`).
+  * Real-time balance settlement: Automatically sets invoice to 'paid' when balance reaches $0.
+
+3.9 Staff Operational Reporting & Follow-Up
+-------------------------------------------
+- Route: /staff/reports
+- Functions:
+  * Operational summary metrics:
+    - Quotation win / conversion rate.
+    - Monthly cash collections.
+    - Overdue invoices follow-up tracker.
+    - Active customer account numbers.
+
+3.10 Staff Profile & Session Settings
+-------------------------------------
+- Route: /staff/account
+- Functions:
+  * View current staff credentials, name, email, and assigned role.
+  * View active session details and execute secure sign-out.
+
 
 ================================================================================
-END OF SPECIFICATION (staff.txt)
+4. CUSTOMER PORTAL (/portal)
+================================================================================
+
+4.1 Security Isolation & Multi-Tenant Data Boundaries
+-----------------------------------------------------
+- Built with strict data isolation principles:
+  * Every server action, API query, and data fetch filters records strictly by `auth.uid()`.
+  * In the data layer: `getCustomerSubscriptionById(customerId, subscriptionId)` and
+    `getCustomerInvoiceById(customerId, invoiceId)` return `null` if the record is owned by
+    another customer, resulting in an immediate 404 Not Found.
+  * Customer A modifying URLs or parameters can NEVER access Customer B's data.
+  * PostgreSQL Row Level Security (RLS) policies enforce this isolation at the database layer.
+
+4.2 Customer Dashboard & Subscription Summary
+---------------------------------------------
+- Route: /portal
+- Functions:
+  * Distraction-free subscriber overview.
+  * Key Metric Cards:
+    - Total Active Subscriptions.
+    - Total Outstanding Balance Across Invoices.
+    - Next Upcoming Renewal / Billing Date.
+  * Direct quick links to view subscriptions, download invoices, and manage billing.
+
+4.3 Personal Subscriptions Directory & Detail View
+--------------------------------------------------
+- Routes: /portal/subscriptions, /portal/subscriptions/[id]
+- Functions:
+  * Full list of customer's subscriptions filtered by status (All, Active, Paused, Closed).
+  * Comprehensive Subscription Detail View:
+    - Subscription number, status badge, and assigned plan.
+    - Recurring cadence (Monthly, Yearly, etc.) and payment terms.
+    - Timeline: Start date, current period, and next billing date.
+    - Itemized breakdown of subscribed products, brand variants, quantities, and pricing.
+
+4.4 Self-Service Lifecycle Operations (Governed by Plan Policies)
+-----------------------------------------------------------------
+- Customers can independently perform lifecycle operations subject to Admin-defined policies:
+  * Pause Subscription:
+    - If `pause_eligible = true` in the subscription plan, customer can click "Pause Subscription".
+    - Immediately freezes subscription status to 'paused'.
+    - If `pause_eligible = false`, the action is hidden and blocked server-side with an error message.
+  * Resume Subscription:
+    - Allows customer to un-pause a paused subscription back to 'active' status.
+  * Early Renewal:
+    - If `renewal_eligible = true`, customer can initiate self-service renewal.
+    - Automatically advances `next_billing_date` and extends contract term.
+
+4.5 Invoices Registry & Payment History
+---------------------------------------
+- Routes: /portal/invoices, /portal/invoices/[id]
+- Functions:
+  * Complete billing ledger of personal invoices.
+  * Status Filter: All, Paid, Confirmed (Unpaid), Overdue.
+  * Financial Breakdown:
+    - Subtotal, applied discount savings, taxes, total billed, amount paid, and net amount due.
+  * Clear payment status indicators (Paid in Full, Balance Pending, Overdue).
+
+4.6 Printable & PDF-Ready Official Tax Invoices
+-----------------------------------------------
+- Route: /portal/invoices/[id]/print
+- Functions:
+  * Clean, official, print-optimized tax invoice.
+  * Includes Brightloop Software corporate header, customer billing details, and tax ID.
+  * Full itemized invoice table with rates, quantities, taxes, and net totals.
+  * Payment receipt confirmation and settlement history.
+  * Browser print dialog trigger for instant PDF download or physical printing.
+
+4.7 Customer Account Profile & Security Settings
+------------------------------------------------
+- Route: /portal/account
+- Functions:
+  * Inspect registered customer name, company name, and contact email.
+  * View registered billing address on file.
+  * Password update interface with real-time enterprise password strength validator.
+  * Secure session sign-out.
+
+================================================================================
+END OF SPECIFICATION FILE — BRIGHTLOOP SOFTWARE
 ================================================================================

@@ -508,23 +508,13 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
-### Milestone 15: Local Network (LAN) Hosting Configuration
-- **Network Interface Binding:**
-  - Configured Next.js server in `package.json` (`dev` and `start` scripts) to bind to host `0.0.0.0` on port `3000`.
-  - Enables seamless cross-device testing and access from other computers, phones, or tablets on the same local network / Wi-Fi via `http://<local-ip>:3000` (e.g. `http://10.44.158.96:3000`).
-  - Verified local firewall is disabled and confirmed HTTP 200 response on `10.44.158.96:3000`.
-
----
-
-### Milestone 16: Comprehensive System Architecture & Permission Specification
-- **Detailed Functional Documentation (`staff.txt`):**
-  - Compiled exhaustive functional specifications and comparative permission matrix across all 3 workspaces:
-    1. **Admin Panel:** Executive KPIs, interactive sparkline graphs, product catalog & brand variants, plans & lifecycle policies, tax rules, high-density discount rules, standardized quotation templates, sales quotations, subscription operations, recurring billing engine, accounts receivable, payment reconciliation, financial intelligence (MRR/ARR/LTV), team RBAC, customer CRM directory, and admin account management.
-    2. **Staff Panel:** Operational dashboard, CRM profiles, sales quotation creation & conversion, subscription pause/resume/close/renewal management, invoice tracking & delivery, payment collection recording, and operational reports.
-    3. **Customer Portal:** Secure self-service interface with strict customer-level data isolation, overview KPIs, subscription details, plan policy-gated lifecycle controls (pause/resume/renew), personal invoice ledger, printable tax invoices, and account security management.
-  - Documented 4 primary end-to-end operational workflows: Sales Deal to Active Subscription, Recurring Billing Cycle & Invoicing, Payment Collection & Balance Settlement, and Customer Self-Service Lifecycle Operations.
-- **Repository Inventory:**
-  - Added [`staff.txt`](file:///Users/shiv/Odoo_hackathon_project/staff.txt) to repository documentation.
+### Milestone 15: Complete Functional Directory Specification (staff.txt)
+- **Authoring Exhaustive Functional Directory:**
+  - Authored [`staff.txt`](file:///Users/shiv/Odoo_hackathon_project/staff.txt) (500 lines, 3,150+ words) listing all functions, state machines, business calculation rules, permission boundaries, and workflows across:
+    1. **Authentication & Login System:** Supabase Auth, RBAC roles (`admin`, `staff`, `customer`), password strength criteria, customer registration, unified tabbed internal login (`/internal-login`) with shorthand username recognition (`shivanshu`, `aryan`, `hirensir`, `admin`, `staff`), and route protection middleware.
+    2. **Admin Panel (/admin):** Operational intelligence dashboard with SVG sparklines, product catalog with variants, subscription plans with lifecycle policies, tax rules (inclusive/exclusive/compounding), discount rules engine, quotation templates, subscription management, automated recurring billing engine with idempotency, invoices lifecycle state machine, payments balance reconciliation, pre-seeded team roster, and financial reporting.
+    3. **Staff Panel (/staff):** Operational boundary constraints, daily operations overview, customer directory & CRM, dynamic quotation builder with variant adjustments, idempotent quotation-to-subscription conversion, active subscription handling, invoice review & confirmation, payment recording, and operational reports.
+    4. **Customer Portal (/portal):** Strict tenant isolation (preventing cross-customer data leakage via database RLS and server checks), subscriber dashboard, personal subscriptions directory, self-service pause/resume/renew actions governed by plan policies, invoices registry, and printable tax invoices.
 
 ---
 
