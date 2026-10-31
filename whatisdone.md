@@ -516,6 +516,18 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 16: Comprehensive System Architecture & Permission Specification
+- **Detailed Functional Documentation (`staff.txt`):**
+  - Compiled exhaustive functional specifications and comparative permission matrix across all 3 workspaces:
+    1. **Admin Panel:** Executive KPIs, interactive sparkline graphs, product catalog & brand variants, plans & lifecycle policies, tax rules, high-density discount rules, standardized quotation templates, sales quotations, subscription operations, recurring billing engine, accounts receivable, payment reconciliation, financial intelligence (MRR/ARR/LTV), team RBAC, customer CRM directory, and admin account management.
+    2. **Staff Panel:** Operational dashboard, CRM profiles, sales quotation creation & conversion, subscription pause/resume/close/renewal management, invoice tracking & delivery, payment collection recording, and operational reports.
+    3. **Customer Portal:** Secure self-service interface with strict customer-level data isolation, overview KPIs, subscription details, plan policy-gated lifecycle controls (pause/resume/renew), personal invoice ledger, printable tax invoices, and account security management.
+  - Documented 4 primary end-to-end operational workflows: Sales Deal to Active Subscription, Recurring Billing Cycle & Invoicing, Payment Collection & Balance Settlement, and Customer Self-Service Lifecycle Operations.
+- **Repository Inventory:**
+  - Added [`staff.txt`](file:///Users/shiv/Odoo_hackathon_project/staff.txt) to repository documentation.
+
+---
+
 ## 3. Current Repository State
 
 - **Branch:** `main`
