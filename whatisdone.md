@@ -419,6 +419,27 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 11: Information-Dense Discount Rules Admin Page Simplification
+- **Streamlined Page Header:**
+  - Removed redundant descriptive subtitle below the "Discount Rules" page heading in `src/app/(admin)/admin/discounts/page.tsx`.
+- **Eliminated Promotional Descriptions:**
+  - Removed verbose description copy beneath discount codes (`VOLUME20`, `ENTERPRISE200`), rendering clean monospace code tags.
+- **Removed Redundant Type Badges:**
+  - Removed redundant `PERCENTAGE` and `FIXED` pills; the value format directly communicates the discount type (`20%` vs `$200`).
+- **Compact Inline Eligibility Conditions:**
+  - Condensed multi-line min purchase and quantity rules into compact inline text (e.g. `$1,000 min. · 1 seat min.`).
+- **Simplified Applicability Targets:**
+  - Directly displays `All subscriptions` or the specific product name (e.g. `Dedicated Data Engineering Support`) without redundant category wrapper labels.
+- **Compact Usage & Single-Line Validity:**
+  - Standardized usage display as `12 / 100` and `5 / 50`.
+  - Rendered validity dates on a single line (`2026-01-01 – 2027-12-31`) with `whitespace-nowrap`.
+- **Quality Assurance & Verification:**
+  - Verified layout in Chrome DevTools MCP with screenshot capture.
+  - Zero TypeScript or lint errors (`npm run build`).
+  - All 43 automated unit & integration tests passing (`npm test`).
+
+---
+
 ## 3. Current Repository State
 
 - **Branch:** `main`
