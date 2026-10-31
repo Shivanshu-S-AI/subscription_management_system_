@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { globalSearch } from "@/lib/data/store";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface SearchResult {
   type: "Customer" | "Subscription" | "Invoice" | "Quotation" | "Product";
@@ -173,7 +174,8 @@ export function StaffHeader({ onMenuClick }: { onMenuClick?: () => void }) {
           )}
         </div>
 
-        {/* Staff Role Badge */}
+        {/* Staff Role Badge & Theme Toggle */}
+        <ThemeToggle />
         <div className="flex items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 text-[11px] font-mono font-medium text-blue-600">
           <UserCheck className="h-3 w-3" />
           <span className="hidden sm:inline">STAFF</span>

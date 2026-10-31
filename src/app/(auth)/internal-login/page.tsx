@@ -110,7 +110,7 @@ function InternalLoginForm() {
           onClick={() => handleTabSwitch("staff")}
           className={`flex items-center justify-center gap-2 py-2 px-3 rounded-sm text-xs transition-all ${
             !isAdmin
-              ? "bg-white text-ink font-semibold shadow-whisper border border-hairline/80"
+              ? "bg-canvas-elevated text-ink font-semibold shadow-whisper border border-hairline/80"
               : "text-mute hover:text-ink hover:bg-canvas-elevated font-medium"
           }`}
         >
@@ -123,7 +123,7 @@ function InternalLoginForm() {
           onClick={() => handleTabSwitch("admin")}
           className={`flex items-center justify-center gap-2 py-2 px-3 rounded-sm text-xs transition-all ${
             isAdmin
-              ? "bg-white text-ink font-semibold shadow-whisper border border-hairline/80"
+              ? "bg-canvas-elevated text-ink font-semibold shadow-whisper border border-hairline/80"
               : "text-mute hover:text-ink hover:bg-canvas-elevated font-medium"
           }`}
         >

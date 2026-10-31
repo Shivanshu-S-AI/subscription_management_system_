@@ -440,6 +440,33 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 12: Vercel Geist Dark Theme Architecture & Seamless Theme Toggle
+- **Vercel Dark Theme Design Tokens:**
+  - Configured `tailwind.config.ts` with `darkMode: "class"` and mapped semantic color channels (`canvas`, `canvas-elevated`, `ink`, `body`, `mute`, `hairline`, `primary`) to dynamic CSS variable channels supporting full opacity modifiers (`<alpha-value>`).
+  - Added full dark mode token ladder in `src/app/globals.css`:
+    - Canvas (pure pitch black): `#000000`
+    - Elevated Surface: `#0a0a0a`
+    - High-contrast Ink: `#ededed`
+    - Body Text: `#a1a1a1`
+    - Muted Caption Text: `#707070`
+    - Hairline Border: `#222222`
+    - Dark mode luminous hero mesh gradient and dark scrollbar styling.
+- **Inverted Dark Mode Button Aesthetics:**
+  - Implemented Vercel dark mode primary button aesthetics (`bg-ink` inverts cleanly to crisp white `#ededed` surface with black text/icons, and `#ffffff` on hover).
+- **Universal Theme Toggle Component (`src/components/theme-toggle.tsx`):**
+  - Integrated 1-click theme switcher with instant zero-flash hydration across:
+    - Public Navbar (`src/components/layout/navbar.tsx`)
+    - Admin Workspace Header (`src/components/admin/admin-header.tsx`)
+    - Staff Operations Header (`src/components/staff/staff-header.tsx`)
+    - Customer Portal Navbar (`src/components/portal/portal-navbar.tsx`)
+  - Defaults to Dark Mode across the application while allowing instant user toggling between Dark and Light themes.
+- **Automated Verification & Visual Inspection:**
+  - Verified dark and light modes via Chrome DevTools MCP with screenshot validations.
+  - All 43 automated unit & integration tests passing (`npm test`).
+  - Zero TypeScript or lint errors in production build (`npm run build`).
+
+---
+
 ## 3. Current Repository State
 
 - **Branch:** `main`

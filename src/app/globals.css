@@ -3,15 +3,35 @@
 @tailwind utilities;
 
 :root {
-  --canvas: #fafafa;
-  --canvas-elevated: #ffffff;
-  --ink: #171717;
-  --body: #4d4d4d;
-  --mute: #8f8f8f;
-  --faint: #a1a1a1;
-  --hairline: #ebebeb;
-  --hairline-soft: #f2f2f2;
-  --link: #0070f3;
+  --canvas: 250 250 250;           /* #fafafa */
+  --canvas-elevated: 255 255 255;  /* #ffffff */
+  --ink: 23 23 23;                 /* #171717 */
+  --body: 77 77 77;                /* #4d4d4d */
+  --mute: 143 143 143;             /* #8f8f8f */
+  --faint: 161 161 161;            /* #a1a1a1 */
+  --hairline: 235 235 235;         /* #ebebeb */
+  --hairline-soft: 242 242 242;    /* #f2f2f2 */
+  --primary: 23 23 23;             /* #171717 */
+  --on-primary: 255 255 255;       /* #ffffff */
+  --link: 0 112 243;               /* #0070f3 */
+  --link-deep: 7 97 209;           /* #0761d1 */
+  --link-soft: 211 229 255;        /* #d3e5ff */
+}
+
+.dark, [data-theme="dark"] {
+  --canvas: 0 0 0;                 /* #000000 (Pure pitch black canvas) */
+  --canvas-elevated: 10 10 10;     /* #0a0a0a (Vercel dark elevated surface) */
+  --ink: 237 237 237;              /* #ededed (High-contrast ink) */
+  --body: 161 161 161;             /* #a1a1a1 (Readable body text) */
+  --mute: 112 112 112;             /* #707070 (Secondary mute) */
+  --faint: 68 68 68;               /* #444444 (Faint border/divider) */
+  --hairline: 34 34 34;            /* #222222 (1px hairline border) */
+  --hairline-soft: 23 23 23;       /* #171717 */
+  --primary: 237 237 237;          /* #ededed */
+  --on-primary: 0 0 0;             /* #000000 */
+  --link: 50 145 255;              /* #3291ff */
+  --link-deep: 0 112 243;          /* #0070f3 */
+  --link-soft: 15 35 60;
 }
 
 html {
@@ -19,11 +39,18 @@ html {
 }
 
 body {
-  background-color: var(--canvas);
-  color: var(--body);
+  background-color: rgb(var(--canvas));
+  color: rgb(var(--body));
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark mode inputs, selects & textareas */
+.dark input,
+.dark select,
+.dark textarea {
+  color-scheme: dark;
 }
 
 /* Hero Mesh Gradient strictly following DESIGN.md */
@@ -34,6 +61,35 @@ body {
     radial-gradient(at 50% 50%, rgba(121, 40, 202, 0.09) 0px, transparent 55%),
     radial-gradient(at 80% 85%, rgba(255, 0, 128, 0.08) 0px, transparent 45%),
     radial-gradient(at 20% 85%, rgba(249, 203, 40, 0.10) 0px, transparent 45%);
+}
+
+.dark .hero-mesh-gradient {
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(80, 227, 194, 0.16) 0px, transparent 50%),
+    radial-gradient(at 85% 10%, rgba(0, 124, 240, 0.16) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(121, 40, 202, 0.13) 0px, transparent 55%),
+    radial-gradient(at 80% 85%, rgba(255, 0, 128, 0.11) 0px, transparent 50%),
+    radial-gradient(at 20% 85%, rgba(249, 203, 40, 0.12) 0px, transparent 50%);
+}
+
+/* Vercel Dark Mode Primary Button Aesthetics: Crisp inverted pill / button */
+.dark .bg-ink {
+  background-color: #ededed !important;
+  color: #000000 !important;
+}
+
+.dark .bg-ink * {
+  color: #000000 !important;
+}
+
+.dark .bg-ink:hover,
+.dark .hover\:bg-black:hover {
+  background-color: #ffffff !important;
+}
+
+/* Dark mode adjustments for financial highlight colors */
+.dark .text-emerald-600 {
+  color: #34d399 !important;
 }
 
 /* Subtle scrollbars */
@@ -52,3 +108,9 @@ body {
   background: #a1a1a1;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #262626;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #404040;
+}

@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -11,25 +12,25 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#171717",
-          foreground: "#ffffff",
+          DEFAULT: "rgb(var(--primary) / <alpha-value>)",
+          foreground: "rgb(var(--on-primary) / <alpha-value>)",
         },
-        ink: "#171717",
-        body: "#4d4d4d",
-        mute: "#8f8f8f",
-        faint: "#a1a1a1",
+        ink: "rgb(var(--ink) / <alpha-value>)",
+        body: "rgb(var(--body) / <alpha-value>)",
+        mute: "rgb(var(--mute) / <alpha-value>)",
+        faint: "rgb(var(--faint) / <alpha-value>)",
         hairline: {
-          DEFAULT: "#ebebeb",
-          soft: "#f2f2f2",
+          DEFAULT: "rgb(var(--hairline) / <alpha-value>)",
+          soft: "rgb(var(--hairline-soft) / <alpha-value>)",
         },
         canvas: {
-          DEFAULT: "#fafafa",
-          elevated: "#ffffff",
+          DEFAULT: "rgb(var(--canvas) / <alpha-value>)",
+          elevated: "rgb(var(--canvas-elevated) / <alpha-value>)",
         },
         link: {
-          DEFAULT: "#0070f3",
-          deep: "#0761d1",
-          soft: "#d3e5ff",
+          DEFAULT: "rgb(var(--link) / <alpha-value>)",
+          deep: "rgb(var(--link-deep) / <alpha-value>)",
+          soft: "rgb(var(--link-soft) / <alpha-value>)",
         },
         error: {
           DEFAULT: "#ee0000",

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Search, Menu, Shield, ArrowUpRight } from "lucide-react";
 import { globalSearch } from "@/lib/data/store";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AdminHeader({ onMenuClick }: { onMenuClick?: () => void }) {
   const pathname = usePathname();
@@ -115,9 +116,10 @@ export function AdminHeader({ onMenuClick }: { onMenuClick?: () => void }) {
         )}
       </div>
 
-      {/* Right: Status Pill */}
-      <div className="hidden sm:flex items-center gap-2">
-        <span className="flex items-center gap-1.5 rounded-full border border-hairline bg-canvas-elevated px-2.5 py-1 text-[11px] font-mono text-emerald-600">
+      {/* Right: Theme Toggle & Status Pill */}
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        <span className="hidden sm:flex items-center gap-1.5 rounded-full border border-hairline bg-canvas-elevated px-2.5 py-1 text-[11px] font-mono text-emerald-600">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
           <span>OPS READY</span>
         </span>

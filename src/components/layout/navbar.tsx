@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Menu, X } from "lucide-react";
 
 export function Navbar() {
@@ -63,6 +64,7 @@ export function Navbar() {
 
         {/* Desktop Auth CTAs */}
         <div className="hidden md:flex items-center gap-2.5">
+          <ThemeToggle />
           <Link
             href="/login"
             className="inline-flex h-8 items-center justify-center rounded-sm border border-hairline bg-canvas-elevated px-3 text-xs font-medium text-ink transition-colors hover:bg-canvas hover:border-mute/40"

@@ -15,6 +15,7 @@ import {
   Layers,
 } from "lucide-react";
 import { signOutAction } from "@/modules/auth/actions";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface PortalNavbarProps {
   userEmail?: string;
@@ -81,6 +82,7 @@ export function PortalNavbar({ userEmail, customerName }: PortalNavbarProps) {
 
         {/* User Pill & Sign Out */}
         <div className="hidden sm:flex items-center gap-3">
+          <ThemeToggle />
           <div className="flex items-center gap-2 text-xs">
             <div className="h-2 w-2 rounded-full bg-emerald-500" />
             <span className="font-medium text-ink max-w-[180px] truncate">
@@ -101,6 +103,7 @@ export function PortalNavbar({ userEmail, customerName }: PortalNavbarProps) {
 
         {/* Mobile menu toggle */}
         <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle />
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="flex h-8 w-8 items-center justify-center rounded-sm border border-hairline bg-canvas text-mute hover:text-ink"
