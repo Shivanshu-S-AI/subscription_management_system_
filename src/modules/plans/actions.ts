@@ -3,9 +3,15 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createPlan, updatePlan } from "@/lib/data/store";
+import { getCurrentUser } from "@/modules/auth/service";
 import type { BillingFrequency } from "@/types/admin";
 
 export async function createPlanAction(formData: FormData) {
+  const { role } = await getCurrentUser();
+  if (role !== "admin") {
+    throw new Error("Unauthorized: Only administrators can create plans.");
+  }
+
   const name = (formData.get("name") as string)?.trim();
   const price = parseFloat(formData.get("price") as string) || 0;
   const billing_frequency = (formData.get("billing_frequency") as BillingFrequency) || "monthly";
@@ -37,6 +43,11 @@ export async function createPlanAction(formData: FormData) {
 }
 
 export async function updatePlanAction(id: string, formData: FormData) {
+  const { role } = await getCurrentUser();
+  if (role !== "admin") {
+    throw new Error("Unauthorized: Only administrators can update plans.");
+  }
+
   const name = (formData.get("name") as string)?.trim();
   const price = parseFloat(formData.get("price") as string) || 0;
   const billing_frequency = (formData.get("billing_frequency") as BillingFrequency) || "monthly";
@@ -62,4 +73,3 @@ export async function updatePlanAction(id: string, formData: FormData) {
   revalidatePath(`/admin/plans/${id}`);
   redirect("/admin/plans");
 }
-

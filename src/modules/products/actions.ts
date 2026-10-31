@@ -3,8 +3,14 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createProduct, updateProduct } from "@/lib/data/store";
+import { getCurrentUser } from "@/modules/auth/service";
 
 export async function createProductAction(formData: FormData) {
+  const { role } = await getCurrentUser();
+  if (role !== "admin") {
+    throw new Error("Unauthorized: Only administrators can create products.");
+  }
+
   const name = (formData.get("name") as string)?.trim();
   const type = (formData.get("type") as string) || "software";
   const sales_price = parseFloat(formData.get("sales_price") as string) || 0;
@@ -38,6 +44,11 @@ export async function createProductAction(formData: FormData) {
 }
 
 export async function updateProductAction(id: string, formData: FormData) {
+  const { role } = await getCurrentUser();
+  if (role !== "admin") {
+    throw new Error("Unauthorized: Only administrators can update products.");
+  }
+
   const name = (formData.get("name") as string)?.trim();
   const type = (formData.get("type") as string) || "software";
   const sales_price = parseFloat(formData.get("sales_price") as string) || 0;
@@ -56,4 +67,3 @@ export async function updateProductAction(id: string, formData: FormData) {
   revalidatePath(`/admin/products/${id}`);
   redirect("/admin/products");
 }
-

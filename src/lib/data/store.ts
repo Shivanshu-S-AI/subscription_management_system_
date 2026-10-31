@@ -1667,7 +1667,85 @@ export function createStaffMember(data: {
 }
 
 // --- Global Search ---
-export function globalSearch(query: string) {
+export function markInvoiceSent(id: string): { success: boolean; invoice?: Invoice; error?: string } {
+  const store = getStore();
+  const inv = store.invoices.find((i) => i.id === id);
+  if (!inv) return { success: false, error: "Invoice not found." };
+  inv.sent_at = new Date().toISOString();
+  inv.updated_at = new Date().toISOString();
+  return { success: true, invoice: inv };
+}
+
+export function getStaffDashboardMetrics() {
+  const store = getStore();
+  const today = new Date().toISOString().split("T")[0];
+
+  // 1. Active Subscriptions
+  const activeSubs = store.subscriptions.filter(
+    (s) => s.status === "active" || s.status === "confirmed"
+  );
+
+  // 2. Invoices awaiting confirmation (draft)
+  const draftInvoices = store.invoices.filter((i) => i.status === "draft");
+
+  // 3. Outstanding Invoices (confirmed with balance due > 0)
+  const outstandingInvoices = store.invoices.filter(
+    (i) => i.status === "confirmed" && Number(i.amount_due) > 0
+  );
+
+  // 4. Overdue Invoices (confirmed/draft with balance due > 0 and due_date < today)
+  const overdueInvoices = store.invoices.filter(
+    (i) =>
+      (i.status === "confirmed" || i.status === "draft") &&
+      Number(i.amount_due) > 0 &&
+      i.due_date < today
+  );
+
+  const outstandingAmountTotal = outstandingInvoices.reduce(
+    (sum, i) => sum + Number(i.amount_due),
+    0
+  );
+  const overdueAmountTotal = overdueInvoices.reduce(
+    (sum, i) => sum + Number(i.amount_due),
+    0
+  );
+
+  // Subscriptions requiring operational attention (draft, quotation, or expiring within 14 days)
+  const attentionSubscriptions = store.subscriptions.filter((s) => {
+    if (s.status === "draft" || s.status === "quotation") return true;
+    if (s.status === "active" && s.expiry_date) {
+      const end = new Date(s.expiry_date).getTime();
+      const now = new Date().getTime();
+      const daysUntilEnd = (end - now) / (1000 * 60 * 60 * 24);
+      return daysUntilEnd <= 14 && daysUntilEnd >= 0;
+    }
+    return false;
+  });
+
+  return {
+    summary: {
+      activeSubscriptionsCount: activeSubs.length,
+      invoicesAwaitingConfirmationCount: draftInvoices.length,
+      outstandingInvoicesCount: outstandingInvoices.length,
+      overdueInvoicesCount: overdueInvoices.length,
+      outstandingAmountTotal,
+      overdueAmountTotal,
+    },
+    attentionRequired: {
+      overdueInvoices: overdueInvoices.slice(0, 5),
+      draftInvoices: draftInvoices.slice(0, 5),
+      attentionSubscriptions: attentionSubscriptions.slice(0, 5),
+    },
+    recentActivity: {
+      quotations: store.quotations.slice(0, 5),
+      subscriptions: store.subscriptions.slice(0, 5),
+      invoices: store.invoices.slice(0, 5),
+      payments: store.payments.slice(0, 5),
+    },
+  };
+}
+
+export function globalSearch(query: string, workspace: "admin" | "staff" = "admin") {
   if (!query || query.trim().length === 0) return [];
   const q = query.trim().toLowerCase();
   const store = getStore();
@@ -1689,7 +1767,7 @@ export function globalSearch(query: string) {
         type: "Customer",
         title: c.full_name,
         subtitle: `${c.company_name ? c.company_name + " · " : ""}${c.email}`,
-        url: `/admin/customers/${c.id}`,
+        url: `/${workspace}/customers/${c.id}`,
       });
     }
   });
@@ -1702,7 +1780,7 @@ export function globalSearch(query: string) {
         type: "Subscription",
         title: s.subscription_number,
         subtitle: `${cust?.full_name || "Customer"} · $${s.total_amount.toFixed(2)} · ${s.status.toUpperCase()}`,
-        url: `/admin/subscriptions/${s.id}`,
+        url: `/${workspace}/subscriptions/${s.id}`,
       });
     }
   });
@@ -1715,7 +1793,7 @@ export function globalSearch(query: string) {
         type: "Invoice",
         title: i.invoice_number,
         subtitle: `${cust?.full_name || "Customer"} · Due $${i.amount_due.toFixed(2)} · ${i.status.toUpperCase()}`,
-        url: `/admin/invoices/${i.id}`,
+        url: `/${workspace}/invoices/${i.id}`,
       });
     }
   });
@@ -1728,7 +1806,7 @@ export function globalSearch(query: string) {
         type: "Quotation",
         title: quote.quote_number,
         subtitle: `${cust?.full_name || "Customer"} · $${quote.total_amount.toFixed(2)} · ${quote.status.toUpperCase()}`,
-        url: `/admin/quotations/${quote.id}`,
+        url: `/${workspace}/quotations/${quote.id}`,
       });
     }
   });
@@ -1740,7 +1818,7 @@ export function globalSearch(query: string) {
         type: "Product",
         title: p.name,
         subtitle: `$${p.sales_price.toFixed(2)} · ${p.type.toUpperCase()}`,
-        url: `/admin/products/${p.id}`,
+        url: workspace === "admin" ? `/admin/products/${p.id}` : `/staff/quotations/new?product_id=${p.id}`,
       });
     }
   });

@@ -9,6 +9,7 @@ import {
 import type { SubscriptionStatus, BillingFrequency } from "@/types/admin";
 
 export async function createSubscriptionAction(formData: FormData) {
+  const workspace = (formData.get("workspace") as string) || "admin";
   const customer_id = formData.get("customer_id") as string;
   const plan_id = formData.get("plan_id") as string;
   const billing_frequency = (formData.get("billing_frequency") as BillingFrequency) || "monthly";
@@ -35,16 +36,26 @@ export async function createSubscriptionAction(formData: FormData) {
   });
 
   revalidatePath("/admin/subscriptions");
-  redirect(`/admin/subscriptions/${newSub.id}`);
+  revalidatePath("/staff/subscriptions");
+  revalidatePath("/admin");
+  revalidatePath("/staff");
+
+  if (workspace === "staff") {
+    redirect(`/staff/subscriptions/${newSub.id}`);
+  } else {
+    redirect(`/admin/subscriptions/${newSub.id}`);
+  }
 }
 
 export async function updateSubStatusAction(
   subscriptionId: string,
   newStatus: SubscriptionStatus
-) {
-  const res = updateSubscriptionStatus(subscriptionId, newStatus);
+): Promise<void> {
+  updateSubscriptionStatus(subscriptionId, newStatus);
   revalidatePath("/admin/subscriptions");
   revalidatePath(`/admin/subscriptions/${subscriptionId}`);
-  return res;
+  revalidatePath("/staff/subscriptions");
+  revalidatePath(`/staff/subscriptions/${subscriptionId}`);
+  revalidatePath("/admin");
+  revalidatePath("/staff");
 }
-

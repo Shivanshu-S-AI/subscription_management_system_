@@ -7,8 +7,14 @@ import {
   createQuotation,
   convertQuotationToSubscription,
 } from "@/lib/data/store";
+import { getCurrentUser } from "@/modules/auth/service";
 
 export async function createTemplateAction(formData: FormData) {
+  const { role } = await getCurrentUser();
+  if (role !== "admin") {
+    throw new Error("Unauthorized: Only administrators can create quotation templates.");
+  }
+
   const name = (formData.get("name") as string)?.trim();
   const description = (formData.get("description") as string) || "";
   const plan_id = formData.get("plan_id") as string;
@@ -31,6 +37,7 @@ export async function createTemplateAction(formData: FormData) {
 }
 
 export async function createQuotationAction(formData: FormData) {
+  const workspace = (formData.get("workspace") as string) || "admin";
   const customer_id = formData.get("customer_id") as string;
   const plan_id = formData.get("plan_id") as string;
   const template_id = (formData.get("template_id") as string) || undefined;
@@ -59,16 +66,34 @@ export async function createQuotationAction(formData: FormData) {
   });
 
   revalidatePath("/admin/quotations");
-  redirect(`/admin/quotations/${newQuote.id}`);
+  revalidatePath("/staff/quotations");
+  revalidatePath("/admin");
+  revalidatePath("/staff");
+
+  if (workspace === "staff") {
+    redirect(`/staff/quotations/${newQuote.id}`);
+  } else {
+    redirect(`/admin/quotations/${newQuote.id}`);
+  }
 }
 
-export async function convertQuoteAction(quoteId: string) {
+export async function convertQuoteAction(quoteId: string, workspace: "admin" | "staff" = "admin") {
+  const ws = typeof workspace === "string" ? workspace : "admin";
   const sub = convertQuotationToSubscription(quoteId);
   revalidatePath("/admin/quotations");
   revalidatePath(`/admin/quotations/${quoteId}`);
   revalidatePath("/admin/subscriptions");
+  revalidatePath("/staff/quotations");
+  revalidatePath(`/staff/quotations/${quoteId}`);
+  revalidatePath("/staff/subscriptions");
+  revalidatePath("/admin");
+  revalidatePath("/staff");
+
   if (sub) {
-    redirect(`/admin/subscriptions/${sub.id}`);
+    if (ws === "staff") {
+      redirect(`/staff/subscriptions/${sub.id}`);
+    } else {
+      redirect(`/admin/subscriptions/${sub.id}`);
+    }
   }
 }
-

@@ -3,9 +3,15 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createDiscount, updateDiscount } from "@/lib/data/store";
+import { getCurrentUser } from "@/modules/auth/service";
 import type { DiscountType, DiscountApplicability } from "@/types/admin";
 
 export async function createDiscountAction(formData: FormData) {
+  const { role } = await getCurrentUser();
+  if (role !== "admin") {
+    throw new Error("Unauthorized: Only administrators can create discount rules.");
+  }
+
   const code = (formData.get("code") as string)?.trim().toUpperCase();
   const description = (formData.get("description") as string) || "";
   const discount_type = (formData.get("discount_type") as DiscountType) || "percentage";
@@ -42,4 +48,3 @@ export async function createDiscountAction(formData: FormData) {
   revalidatePath("/admin/discounts");
   redirect("/admin/discounts");
 }
-

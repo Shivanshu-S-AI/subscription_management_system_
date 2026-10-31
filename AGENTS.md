@@ -4,9 +4,8 @@ This document outlines the operational rules and standards for all AI agents wor
 
 ---
 
-
-please git pull before working and git push after working.... 
-keep updating old and new system changes to whatisdone.md file.. so we can understand where we left off and other people working with agents and their agents know what is done and have some context.. visit that file to for context.. 
+git push after working....
+keep updating old and new system changes to whatisdone.md file.. so we can understand where we left off and other people working with agents and their agents know what is done and have some context.. visit that file to for context..
 
 ## 1. Core Operating Principles
 
@@ -42,4 +41,3 @@ keep updating old and new system changes to whatisdone.md file.. so we can under
    - Build only what is specified in the problem statement (`Subscription_Management_System.pdf`).
    - Do not invent multi-tenant systems or multi-company architectures; Brightloop Software is a single company managing its own subscription operations.
    - The public landing page must present Brightloop Software as a business (offering data analysis services & software), keeping admin and internal dashboard complexities behind authenticated routes.
-

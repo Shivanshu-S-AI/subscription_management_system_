@@ -17,7 +17,11 @@ export default async function QuotationDetailPage({
     notFound();
   }
 
-  const convertWithId = convertQuoteAction.bind(null, quote.id);
+  const quoteId = quote.id;
+  async function handleConvert() {
+    "use server";
+    await convertQuoteAction(quoteId, "admin");
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -60,7 +64,7 @@ export default async function QuotationDetailPage({
         {/* Conversion Action */}
         <div className="flex items-center gap-3">
           {quote.status !== "converted" ? (
-            <form action={convertWithId}>
+            <form action={handleConvert}>
               <button
                 type="submit"
                 className="inline-flex h-9 items-center gap-2 rounded-sm bg-ink px-4 text-xs font-medium text-white shadow-whisper hover:bg-black transition-colors"

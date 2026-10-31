@@ -237,6 +237,7 @@ export interface Invoice {
   amount_paid: number;
   amount_due: number;
   notes?: string;
+  sent_at?: string;
   lines: InvoiceLine[];
   payments?: Payment[];
   created_at: string;

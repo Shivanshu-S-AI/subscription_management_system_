@@ -6,6 +6,7 @@ import { recordPayment } from "@/lib/data/store";
 import type { PaymentMethod } from "@/types/admin";
 
 export async function recordPaymentAction(formData: FormData) {
+  const workspace = (formData.get("workspace") as string) || "admin";
   const invoice_id = formData.get("invoice_id") as string;
   const amount = parseFloat(formData.get("amount") as string) || 0;
   const payment_method = (formData.get("payment_method") as PaymentMethod) || "bank_transfer";
@@ -28,6 +29,14 @@ export async function recordPaymentAction(formData: FormData) {
   revalidatePath("/admin/invoices");
   revalidatePath(`/admin/invoices/${invoice_id}`);
   revalidatePath("/admin");
-  redirect(`/admin/invoices/${invoice_id}`);
-}
+  revalidatePath("/staff/payments");
+  revalidatePath("/staff/invoices");
+  revalidatePath(`/staff/invoices/${invoice_id}`);
+  revalidatePath("/staff");
 
+  if (workspace === "staff") {
+    redirect(`/staff/invoices/${invoice_id}`);
+  } else {
+    redirect(`/admin/invoices/${invoice_id}`);
+  }
+}

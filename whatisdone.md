@@ -176,7 +176,86 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 6: Phase 2 — Complete Staff Workspace (Brightloop Subscription Management System)
+- **Role & Authorization Architecture:**
+  - Implemented dedicated protected Staff Workspace under route hierarchy `/staff/*` with server-side layout authorization (`src/app/(staff)/staff/layout.tsx`).
+  - Strict role check: Authenticated users without `staff` or `admin` role are redirected to `/portal`; unauthenticated visitors are redirected to `/internal-login?redirect=/staff`.
+  - Administrative Isolation: Attempts by staff to navigate to `/admin/*` automatically trigger a server-side redirect to `/staff`.
+  - Protected Action Handlers: Admin-only server actions (`products`, `plans`, `taxes`, `discounts`, `team`, `billing`) enforce server-side role verification (`role === "admin"`) and reject staff invocation with explicit unauthorized exceptions.
+
+- **Staff Navigation & Global Search Chrome (`src/components/staff/`):**
+  - `src/components/staff/staff-sidebar.tsx`: Clean, focused operational sidebar covering Overview, Customers, Quotations, Subscriptions, Invoices, Payments, Operational Reports, and My Account. Omits admin configuration modules.
+  - `src/components/staff/staff-header.tsx`: Header chrome with mobile menu drawer toggle, dynamic breadcrumbs, `STAFF` role badge, and integrated real-time global search modal routing directly to `/staff/...` entities.
+  - `src/components/staff/staff-layout-client.tsx`: Responsive client wrapper maintaining mobile sidebar states.
+
+- **Completed Staff UI Modules (All 54 Next.js Routes Compiled):**
+  - **Overview Dashboard (`/staff`):**
+    - Answers the operational question: *"What operational work needs attention?"*
+    - 4 Real-Time KPI Cards: Active Subscriptions, Invoices Awaiting Confirmation, Outstanding Invoices (with total balance), and Overdue Invoices (with past-due amount).
+    - Quick Actions Bar: Find Customer, Create Quotation, Search Subscriptions, Open Invoices, Record Payment.
+    - Actionable Work Queues: Overdue Invoices with 1-click payment recording; Draft Invoices pending review; Subscriptions requiring attention.
+    - Real-Time Feed: Recent payment receipts, active subscription status changes, and prepared quotations.
+  - **Customer Directory & 360° Profile (`/staff/customers`, `/staff/customers/[id]`):**
+    - Customer search by name, email, or company.
+    - Customer list with active subscriptions count, invoices count, and balance due.
+    - 360-degree customer detail view linking customer records to their Subscriptions, Quotations, Invoices, and Payment Receipts.
+    - Contextual action to draft a quotation directly for the customer.
+  - **Customer Quotations (`/staff/quotations`, `/staff/quotations/new`, `/staff/quotations/[id]`):**
+    - Quotation preparation wizard: Select customer, pick offer template or custom offer, select product and brand/edition variant (e.g. Odoo brand +$560), configure quantity, tax rate, and validity days.
+    - Status filtering: All, Draft, Sent, Approved, Converted, Expired.
+    - Quotation detail with price snapshot, tax/discount calculation, and one-click conversion to confirmed subscriptions.
+  - **Subscription Lifecycle (`/staff/subscriptions`, `/staff/subscriptions/[id]`):**
+    - Subscriptions listing with status filtering (Active, Confirmed, Paused, Draft, Closed).
+    - Subscription detail with line items, contracted recurring charge, and linked invoices history.
+    - Plan-Governed Lifecycle Actions: Confirm, Activate, Pause (validated against `plan.pause_eligible`), Resume, Renew (validated against `plan.renewal_eligible`), and Close Early (validated against `plan.early_close_eligible`).
+  - **Invoice Management & Actions (`/staff/invoices`, `/staff/invoices/[id]`, `/staff/invoices/[id]/print`):**
+    - Status filters: All, Overdue, Outstanding, Draft, Confirmed, Paid, Cancelled.
+    - Required Staff Actions: Confirm draft invoice, Cancel invoice, Send invoice to customer (with sent timestamp), and Print invoice.
+    - Dedicated printable invoice document (`/staff/invoices/[id]/print`) with print-optimized CSS.
+    - Strict financial invariant: Invoices can only transition to `Paid` via genuine recorded payment transactions.
+  - **Payment Reconciliation (`/staff/payments`, `/staff/payments/new`):**
+    - Replaces manual spreadsheet and bank statement matching: Staff record incoming bank wires, cards, or cheques against specific unpaid invoices.
+    - Selected invoice details pill showing total invoiced and remaining balance due.
+    - Validates payment amount, automatically deducts from invoice balance, and marks invoice as `paid` upon full settlement.
+  - **Operational Reports & Collections Aging (`/staff/reports`):**
+    - Read-only operational dashboard to chase receivables and monitor collections.
+    - Accounts Receivable Aging Schedule (Current, 1–30 Days, 31–60 Days, 60+ Days Overdue).
+    - Actionable collections queue with customer and status filters.
+  - **My Account (`/staff/account`):**
+    - Staff profile details, user ID, email, role badge ("Role: Internal Staff"), permissions boundary card (permitted operations vs administrative restrictions), and sign-out.
+
+- **Verification & Testing:**
+  - `npm run build`: verified all 54 routes compile without TypeScript or bundle errors.
+  - Server-Side Authorization: Verified via HTTP 307 headers that staff cannot access `/admin/*` and unauthenticated visitors cannot access `/staff/*`.
+  - Automated visual verification via Chrome DevTools MCP:
+    - Captured desktop screenshots (1440×900) across `/staff`, `/staff/invoices`, and `/staff/reports`.
+    - Captured mobile screenshot (390×844) validating responsive layout, cards, and navigation.
+  - Strict adherence to `DESIGN.md` (Geist tokens: `#fafafa` canvas, `#ffffff` card surfaces, `#171717` ink, `#ebebeb` borders, 6px rounded controls).
+
+---
+
 ## 3. Current Repository State
+
+- **Branch:** `main`
+- **Working Tree:**
+  - `src/app/(staff)/staff/`: Complete Phase 2 Staff Workspace (Overview, Customers, Quotations, Subscriptions, Invoices, Payments, Reports, Account).
+  - `src/app/(admin)/admin/`: Complete Phase 1 Admin Workspace (Overview, Catalog, Plans, Taxes, Discounts, Billing, Reports, Team).
+  - `src/components/staff/`: Staff sidebar, header with global search, and layout shell.
+  - `src/components/admin/`: Admin sidebar, header with global search, and print button.
+  - `src/modules/`: Domain business logic actions (`products`, `plans`, `taxes`, `discounts`, `quotations`, `subscriptions`, `billing`, `invoices`, `payments`, `team`, `auth`).
+  - `src/lib/data/store.ts`: Domain models, seed data, calculation utilities, and business rule validators.
+  - `supabase/migrations/`: RBAC auth migration (`001`) and Complete Admin Workspace Schema migration (`002`).
+  - Documentation: `README.md`, `AGENTS.md`, `DESIGN.md`, `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_PLAN.md`, `whatisdone.md`.
+
+---
+
+## 4. Next Implementation Steps (Phase 3 of Hackathon: Customer Self-Service Portal)
+
+1. **Customer Self-Service Portal (`/portal`):**
+   - Protected workspace for subscribers to log in, view active subscriptions, view billing history, download printable invoices, and manage payment profiles.
+2. **End-to-End Integration & Polish:**
+   - Supabase live database connection verification.
+   - Vercel production deployment and health checks.
 
 - **Branch:** `main`
 - **Working Tree:**

@@ -1,32 +1,28 @@
-"use client";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/modules/auth/service";
+import { AdminLayoutClient } from "@/components/admin/admin-layout-client";
 
-import { useState } from "react";
-import { AdminSidebar } from "@/components/admin/admin-sidebar";
-import { AdminHeader } from "@/components/admin/admin-header";
+export const dynamic = "force-dynamic";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, role } = await getCurrentUser();
 
-  return (
-    <div className="flex min-h-screen bg-canvas font-sans text-body antialiased">
-      {/* Sidebar */}
-      <AdminSidebar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+  if (!user) {
+    redirect("/internal-login?redirect=/admin");
+  }
 
-      {/* Main Container */}
-      <div className="flex flex-1 flex-col min-w-0">
-        <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
-          {children}
-        </main>
-      </div>
-    </div>
-  );
+  // Strict role check: only admin can access admin workspace
+  if (role !== "admin") {
+    if (role === "staff") {
+      redirect("/staff");
+    } else {
+      redirect("/portal");
+    }
+  }
+
+  return <AdminLayoutClient>{children}</AdminLayoutClient>;
 }
-
