@@ -130,7 +130,7 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
               <span className="text-[10px] font-medium tracking-wider text-mute uppercase font-mono">
                 Active Subscriptions
               </span>
-              <div className="w-7 h-7 rounded-sm bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+              <div className="w-7 h-7 rounded-sm bg-emerald-500/10 text-emerald-600 dark:text-white dark:bg-white/10 dark:border-white/20 flex items-center justify-center border border-emerald-500/20">
                 <Repeat className="w-3.5 h-3.5" />
               </div>
             </div>
@@ -138,7 +138,7 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
               <span className="text-2xl font-semibold text-ink tracking-tight font-sans">
                 {kpis.activeSubscriptionsCount}
               </span>
-              <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-sm font-medium">
+              <span className="text-[10px] font-mono text-emerald-600 dark:text-white bg-emerald-500/10 dark:bg-white/10 dark:border-white/20 border border-emerald-500/20 px-1.5 py-0.5 rounded-sm font-medium">
                 live recurring
               </span>
             </div>
@@ -220,7 +220,7 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
                 </g>
               </svg>
             </div>
-            <div className="flex items-center gap-1 font-mono text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded-sm">
+            <div className="flex items-center gap-1 font-mono text-[10px] font-medium text-emerald-600 dark:text-white bg-emerald-500/10 dark:bg-white/10 dark:border-white/20 border border-emerald-500/20 px-1.5 py-0.5 rounded-sm">
               <ArrowUp className="w-2.5 h-2.5 stroke-[2]" />
               <span>+12.0%</span>
             </div>
@@ -234,7 +234,7 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
               <span className="text-[10px] font-medium tracking-wider text-mute uppercase font-mono">
                 Revenue Received
               </span>
-              <div className="w-7 h-7 rounded-sm bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center border border-sky-500/20">
+              <div className="w-7 h-7 rounded-sm bg-sky-500/10 text-sky-600 dark:text-white dark:bg-white/10 dark:border-white/20 flex items-center justify-center border border-sky-500/20">
                 <DollarSign className="w-3.5 h-3.5" />
               </div>
             </div>
@@ -321,7 +321,7 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
                 </g>
               </svg>
             </div>
-            <div className="flex items-center gap-1 font-mono text-[10px] font-medium text-sky-600 dark:text-sky-400 bg-sky-500/10 border border-sky-500/20 px-1.5 py-0.5 rounded-sm">
+            <div className="flex items-center gap-1 font-mono text-[10px] font-medium text-sky-600 dark:text-white bg-sky-500/10 dark:bg-white/10 dark:border-white/20 border border-sky-500/20 px-1.5 py-0.5 rounded-sm">
               <ArrowUp className="w-2.5 h-2.5 stroke-[2]" />
               <span>+18.4%</span>
             </div>
@@ -335,7 +335,7 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
               <span className="text-[10px] font-medium tracking-wider text-mute uppercase font-mono">
                 Outstanding Amount
               </span>
-              <div className="w-7 h-7 rounded-sm bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20">
+              <div className="w-7 h-7 rounded-sm bg-amber-500/10 text-amber-600 dark:text-white dark:bg-white/10 dark:border-white/20 flex items-center justify-center border border-amber-500/20">
                 <Clock className="w-3.5 h-3.5" />
               </div>
             </div>
@@ -343,7 +343,7 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
               <span className="text-2xl font-semibold text-ink tracking-tight font-sans">
                 {formatCurrency(kpis.outstandingAmountTotal)}
               </span>
-              <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-sm font-mono">
+              <span className="text-[10px] font-medium text-amber-600 dark:text-white bg-amber-500/10 dark:bg-white/10 dark:border-white/20 border border-amber-500/20 px-1.5 py-0.5 rounded-sm font-mono">
                 unpaid
               </span>
             </div>
@@ -425,7 +425,7 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
                 </g>
               </svg>
             </div>
-            <div className="flex items-center gap-1 font-mono text-[10px] font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded-sm">
+            <div className="flex items-center gap-1 font-mono text-[10px] font-medium text-amber-600 dark:text-white bg-amber-500/10 dark:bg-white/10 dark:border-white/20 border border-amber-500/20 px-1.5 py-0.5 rounded-sm">
               <Minus className="w-2.5 h-2.5 stroke-[2]" />
               <span>-3.1%</span>
             </div>
@@ -433,29 +433,29 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
         </div>
 
         {/* Metric Card 4: Overdue Invoices (Urgent State) */}
-        <div className="bg-canvas-elevated border border-rose-500/30 rounded-md p-4 shadow-whisper hover:shadow-floating transition-all flex flex-col justify-between group relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none" />
+        <div className="bg-canvas-elevated border border-rose-500/30 dark:border-hairline rounded-md p-4 shadow-whisper hover:shadow-floating transition-all flex flex-col justify-between group relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 dark:bg-white/5 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none" />
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-medium tracking-wider text-rose-600 dark:text-rose-400 uppercase font-mono">
+              <span className="text-[10px] font-medium tracking-wider text-rose-600 dark:text-mute uppercase font-mono">
                 Overdue Invoices
               </span>
-              <div className="w-7 h-7 rounded-sm bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center border border-rose-500/20">
+              <div className="w-7 h-7 rounded-sm bg-rose-500/10 text-rose-600 dark:text-white dark:bg-white/10 dark:border-white/20 flex items-center justify-center border border-rose-500/20">
                 <AlertTriangle className="w-3.5 h-3.5" />
               </div>
             </div>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-semibold text-rose-600 dark:text-rose-400 tracking-tight font-sans">
+              <span className="text-2xl font-semibold text-rose-600 dark:text-white tracking-tight font-sans">
                 {kpis.overdueInvoicesCount}
               </span>
-              <span className="text-xs font-semibold text-rose-600/90 dark:text-rose-400 font-mono">
+              <span className="text-xs font-semibold text-rose-600/90 dark:text-white/80 font-mono">
                 ({formatCurrency(kpis.overdueAmountTotal)})
               </span>
             </div>
           </div>
 
           {/* Graph Section */}
-          <div className="mt-3 pt-2.5 flex items-center justify-between gap-3 border-t border-rose-500/20">
+          <div className="mt-3 pt-2.5 flex items-center justify-between gap-3 border-t border-rose-500/20 dark:border-hairline">
             <div className="flex-1 h-8 relative">
               <svg
                 className="w-full h-full overflow-visible"
@@ -530,7 +530,7 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
                 </g>
               </svg>
             </div>
-            <div className="flex items-center gap-1 font-mono text-[10px] font-medium text-rose-600 dark:text-rose-400 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded-sm">
+            <div className="flex items-center gap-1 font-mono text-[10px] font-medium text-rose-600 dark:text-white bg-rose-500/10 dark:bg-white/10 dark:border-white/20 border border-rose-500/20 px-1.5 py-0.5 rounded-sm">
               <ArrowUp className="w-2.5 h-2.5 stroke-[2]" />
               <span>Requires action</span>
             </div>
@@ -556,7 +556,7 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
           <div className="p-5 space-y-3 flex-1 flex flex-col justify-start">
             {kpis.overdueInvoices.length === 0 ? (
               <div className="py-6 text-center text-xs text-mute flex flex-col items-center justify-center">
-                <CheckCircle className="h-5 w-5 text-emerald-500 mb-1.5" />
+                <CheckCircle className="h-5 w-5 text-emerald-500 dark:text-white mb-1.5" />
                 <span>All invoices are current. No overdue receivables.</span>
               </div>
             ) : (
@@ -573,13 +573,13 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
                       {inv.invoice_number}
                     </Link>
                     <div className="mt-1">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-medium uppercase font-mono bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] font-medium uppercase font-mono bg-rose-500/10 text-rose-600 dark:bg-white/10 dark:text-white dark:border-white/20 border border-rose-500/20">
                         DUE {inv.due_date}
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 font-mono">
+                    <span className="text-xs font-semibold text-rose-600 dark:text-white font-mono">
                       {formatCurrency(inv.amount_due)}
                     </span>
                   </div>
@@ -671,9 +671,9 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
                   <span
                     className={`inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] uppercase font-mono font-medium ${
                       sub.status === "active"
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-white dark:bg-white/10 dark:border-white/20 border border-emerald-500/20"
                         : sub.status === "confirmed"
-                        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
+                        ? "bg-blue-500/10 text-blue-600 dark:text-white dark:bg-white/10 dark:border-white/20 border border-blue-500/20"
                         : "bg-canvas text-mute border border-hairline"
                     }`}
                   >
@@ -713,7 +713,7 @@ export function DashboardView({ kpis }: { kpis: DashboardKPIs }) {
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
+                  <span className="text-xs font-semibold text-emerald-600 dark:text-white font-mono">
                     +{formatCurrency(p.amount)}
                   </span>
                   <p className="text-[9px] uppercase tracking-wider text-mute font-mono mt-0.5">

@@ -50,6 +50,7 @@ export function DashboardSparkline({
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth="2"
+          className="dark:!stroke-white"
         />
         <g className="spark-points">
           {points.map((pt, idx) => {
@@ -61,9 +62,9 @@ export function DashboardSparkline({
                 cy={pt.cy}
                 r={isLast ? 3.5 : 3}
                 fill={isLast ? color : "currentColor"}
-                className={`transition-all duration-150 cursor-pointer ${
+                className={`transition-all duration-150 cursor-pointer dark:!stroke-white ${
                   isLast
-                    ? "fill-current stroke-white dark:stroke-slate-900 stroke-[1.5] hover:r-[5]"
+                    ? "fill-current stroke-white dark:stroke-slate-900 stroke-[1.5] hover:r-[5] dark:!fill-white"
                     : "fill-white dark:fill-slate-900 stroke-[2] hover:r-[4.5]"
                 }`}
                 style={{ stroke: color }}
@@ -93,7 +94,7 @@ export function DashboardSparkline({
         >
           <div className="flex items-center gap-1.5">
             <span
-              className="w-1.5 h-1.5 rounded-full"
+              className="w-1.5 h-1.5 rounded-full dark:!bg-white"
               style={{ backgroundColor: color }}
             />
             <span className="text-[10px] text-slate-400 uppercase font-sans font-semibold tracking-wider">

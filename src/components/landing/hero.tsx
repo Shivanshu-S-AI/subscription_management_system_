@@ -47,7 +47,7 @@ export function Hero() {
           <div className="rounded-md border border-hairline bg-canvas-elevated/95 p-4 sm:p-5 shadow-whisper backdrop-blur-sm">
             <div className="flex flex-wrap items-center justify-between gap-4 border-b border-hairline/70 pb-3 text-xs text-mute font-mono">
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-white animate-pulse"></span>
                 <span className="text-body font-medium">ANALYTICS ENGINE: ACTIVE</span>
               </div>
               <div className="flex items-center gap-4">
@@ -62,12 +62,12 @@ export function Hero() {
               <div className="rounded-sm border border-hairline-soft bg-canvas p-2.5">
                 <div className="text-[11px] font-mono text-mute">STREAM VELOCITY</div>
                 <div className="text-base font-semibold text-ink mt-0.5">24.6k/s</div>
-                <div className="text-[11px] text-emerald-600 font-mono mt-0.5">+14% vs avg</div>
+                <div className="text-[11px] text-emerald-600 dark:text-white font-mono mt-0.5">+14% vs avg</div>
               </div>
               <div className="rounded-sm border border-hairline-soft bg-canvas p-2.5">
                 <div className="text-[11px] font-mono text-mute">PATTERN CLUSTERS</div>
                 <div className="text-base font-semibold text-ink mt-0.5">18 detected</div>
-                <div className="text-[11px] text-link font-mono mt-0.5">4 high variance</div>
+                <div className="text-[11px] text-link dark:text-white font-mono mt-0.5">4 high variance</div>
               </div>
               <div className="rounded-sm border border-hairline-soft bg-canvas p-2.5">
                 <div className="text-[11px] font-mono text-mute">CORRELATION FACTOR</div>

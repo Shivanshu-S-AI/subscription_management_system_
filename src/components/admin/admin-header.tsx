@@ -127,8 +127,8 @@ export function AdminHeader({
       {/* Right: Theme Toggle & Status Pill */}
       <div className="flex items-center gap-2">
         <ThemeToggle />
-        <span className="hidden sm:flex items-center gap-1.5 rounded-full border border-hairline bg-canvas-elevated px-2.5 py-1 text-[11px] font-mono text-emerald-600">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <span className="hidden sm:flex items-center gap-1.5 rounded-full border border-hairline bg-canvas-elevated px-2.5 py-1 text-[11px] font-mono text-emerald-600 dark:text-white">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-white animate-pulse" />
           <span>OPS READY</span>
         </span>
       </div>

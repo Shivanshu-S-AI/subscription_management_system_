@@ -106,9 +106,9 @@ export default function TaxesPage() {
                     </td>
                     <td className="py-4 pl-6 pr-6 sm:pr-8 align-middle text-right sm:text-left">
                       {t.is_default ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/80">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 dark:bg-white/10 text-emerald-700 dark:text-white border border-emerald-200/80 dark:border-white/20">
                           <svg
-                            className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 stroke-[2.5]"
+                            className="h-3.5 w-3.5 text-emerald-600 dark:text-white stroke-[2.5]"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"

@@ -118,7 +118,7 @@ export default function PlansPage() {
                   <td className="py-4 px-6 align-middle">
                     <div className="flex flex-wrap gap-1.5 items-center">
                       {p.auto_close ? (
-                        <span className="bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/80 text-xs px-2.5 py-1 rounded-md font-medium">
+                        <span className="bg-amber-50 dark:bg-white/10 text-amber-700 dark:text-white border border-amber-200/80 dark:border-white/20 text-xs px-2.5 py-1 rounded-md font-medium">
                           Auto-close
                         </span>
                       ) : (

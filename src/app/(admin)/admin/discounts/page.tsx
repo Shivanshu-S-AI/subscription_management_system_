@@ -141,7 +141,7 @@ export default function DiscountsPage() {
                     </td>
                     {/* Value Column */}
                     <td className="py-4 px-6 whitespace-nowrap">
-                      <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
+                      <span className="text-sm font-semibold text-emerald-600 dark:text-white font-mono">
                         {formatDiscountValue(d)}
                       </span>
                     </td>

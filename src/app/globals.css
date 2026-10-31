@@ -21,17 +21,17 @@
 .dark, [data-theme="dark"] {
   --canvas: 0 0 0;                 /* #000000 (Pure pitch black canvas) */
   --canvas-elevated: 10 10 10;     /* #0a0a0a (Vercel dark elevated surface) */
-  --ink: 237 237 237;              /* #ededed (High-contrast ink) */
-  --body: 161 161 161;             /* #a1a1a1 (Readable body text) */
+  --ink: 255 255 255;              /* #ffffff (Pure crisp white text) */
+  --body: 161 161 161;             /* #a1a1a1 (Readable neutral body text) */
   --mute: 112 112 112;             /* #707070 (Secondary mute) */
   --faint: 68 68 68;               /* #444444 (Faint border/divider) */
   --hairline: 34 34 34;            /* #222222 (1px hairline border) */
   --hairline-soft: 23 23 23;       /* #171717 */
-  --primary: 237 237 237;          /* #ededed */
+  --primary: 255 255 255;          /* #ffffff */
   --on-primary: 0 0 0;             /* #000000 */
-  --link: 50 145 255;              /* #3291ff */
-  --link-deep: 0 112 243;          /* #0070f3 */
-  --link-soft: 15 35 60;
+  --link: 255 255 255;              /* #ffffff (Strictly white in dark mode) */
+  --link-deep: 255 255 255;         /* #ffffff */
+  --link-soft: 38 38 38;            /* #262626 */
 }
 
 html {
@@ -63,33 +63,282 @@ body {
     radial-gradient(at 20% 85%, rgba(249, 203, 40, 0.10) 0px, transparent 45%);
 }
 
-.dark .hero-mesh-gradient {
+.dark .hero-mesh-gradient,
+[data-theme="dark"] .hero-mesh-gradient {
   background-image: 
-    radial-gradient(at 15% 15%, rgba(80, 227, 194, 0.16) 0px, transparent 50%),
-    radial-gradient(at 85% 10%, rgba(0, 124, 240, 0.16) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(121, 40, 202, 0.13) 0px, transparent 55%),
-    radial-gradient(at 80% 85%, rgba(255, 0, 128, 0.11) 0px, transparent 50%),
-    radial-gradient(at 20% 85%, rgba(249, 203, 40, 0.12) 0px, transparent 50%);
+    radial-gradient(at 15% 15%, rgba(255, 255, 255, 0.08) 0px, transparent 50%),
+    radial-gradient(at 85% 10%, rgba(255, 255, 255, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(255, 255, 255, 0.03) 0px, transparent 55%),
+    radial-gradient(at 80% 85%, rgba(255, 255, 255, 0.06) 0px, transparent 50%),
+    radial-gradient(at 20% 85%, rgba(255, 255, 255, 0.04) 0px, transparent 50%);
 }
 
 /* Vercel Dark Mode Primary Button Aesthetics: Crisp inverted pill / button */
-.dark .bg-ink {
+.dark .bg-ink,
+[data-theme="dark"] .bg-ink {
   background-color: #ededed !important;
   color: #000000 !important;
 }
 
-.dark .bg-ink * {
+.dark .bg-ink *,
+[data-theme="dark"] .bg-ink * {
   color: #000000 !important;
 }
 
 .dark .bg-ink:hover,
-.dark .hover\:bg-black:hover {
+.dark .hover\:bg-black:hover,
+[data-theme="dark"] .bg-ink:hover,
+[data-theme="dark"] .hover\:bg-black:hover {
   background-color: #ffffff !important;
 }
 
-/* Dark mode adjustments for financial highlight colors */
-.dark .text-emerald-600 {
-  color: #34d399 !important;
+/* ==========================================================================
+   STRICT MONOCHROME ENFORCEMENT FOR DARK MODE
+   "in dark mode use black and white only no other colours"
+   ========================================================================== */
+
+/* 1. Global selection highlight in dark mode */
+.dark ::selection,
+[data-theme="dark"] ::selection {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* 2. Overrides for any chromatic text color classes in dark mode */
+.dark [class*="text-emerald-"],
+.dark [class*="text-green-"],
+.dark [class*="text-teal-"],
+.dark [class*="text-cyan-"],
+.dark [class*="text-sky-"],
+.dark [class*="text-blue-"],
+.dark [class*="text-indigo-"],
+.dark [class*="text-violet-"],
+.dark [class*="text-purple-"],
+.dark [class*="text-fuchsia-"],
+.dark [class*="text-pink-"],
+.dark [class*="text-rose-"],
+.dark [class*="text-red-"],
+.dark [class*="text-orange-"],
+.dark [class*="text-amber-"],
+.dark [class*="text-yellow-"],
+.dark .text-error,
+.dark .text-warning,
+.dark .text-violet,
+.dark .text-cyan,
+.dark .text-pink,
+.dark .text-magenta,
+[data-theme="dark"] [class*="text-emerald-"],
+[data-theme="dark"] [class*="text-green-"],
+[data-theme="dark"] [class*="text-teal-"],
+[data-theme="dark"] [class*="text-cyan-"],
+[data-theme="dark"] [class*="text-sky-"],
+[data-theme="dark"] [class*="text-blue-"],
+[data-theme="dark"] [class*="text-indigo-"],
+[data-theme="dark"] [class*="text-violet-"],
+[data-theme="dark"] [class*="text-purple-"],
+[data-theme="dark"] [class*="text-fuchsia-"],
+[data-theme="dark"] [class*="text-pink-"],
+[data-theme="dark"] [class*="text-rose-"],
+[data-theme="dark"] [class*="text-red-"],
+[data-theme="dark"] [class*="text-orange-"],
+[data-theme="dark"] [class*="text-amber-"],
+[data-theme="dark"] [class*="text-yellow-"],
+[data-theme="dark"] .text-error,
+[data-theme="dark"] .text-warning,
+[data-theme="dark"] .text-violet,
+[data-theme="dark"] .text-cyan,
+[data-theme="dark"] .text-pink,
+[data-theme="dark"] .text-magenta {
+  color: #ededed !important;
+}
+
+/* Muted / secondary text with opacity */
+.dark [class*="text-emerald-"][class*="/"],
+.dark [class*="text-rose-"][class*="/"],
+.dark [class*="text-red-"][class*="/"],
+.dark [class*="text-blue-"][class*="/"],
+.dark [class*="text-amber-"][class*="/"],
+[data-theme="dark"] [class*="text-emerald-"][class*="/"],
+[data-theme="dark"] [class*="text-rose-"][class*="/"],
+[data-theme="dark"] [class*="text-red-"][class*="/"],
+[data-theme="dark"] [class*="text-blue-"][class*="/"],
+[data-theme="dark"] [class*="text-amber-"][class*="/"] {
+  color: #a3a3a3 !important;
+}
+
+/* 3. Overrides for any chromatic background classes in dark mode */
+.dark [class*="bg-emerald-"],
+.dark [class*="bg-green-"],
+.dark [class*="bg-teal-"],
+.dark [class*="bg-cyan-"],
+.dark [class*="bg-sky-"],
+.dark [class*="bg-blue-"],
+.dark [class*="bg-indigo-"],
+.dark [class*="bg-violet-"],
+.dark [class*="bg-purple-"],
+.dark [class*="bg-fuchsia-"],
+.dark [class*="bg-pink-"],
+.dark [class*="bg-rose-"],
+.dark [class*="bg-red-"],
+.dark [class*="bg-orange-"],
+.dark [class*="bg-amber-"],
+.dark [class*="bg-yellow-"],
+.dark .bg-error,
+.dark .bg-warning,
+.dark .bg-violet,
+.dark .bg-cyan,
+.dark .bg-pink,
+.dark .bg-magenta,
+[data-theme="dark"] [class*="bg-emerald-"],
+[data-theme="dark"] [class*="bg-green-"],
+[data-theme="dark"] [class*="bg-teal-"],
+[data-theme="dark"] [class*="bg-cyan-"],
+[data-theme="dark"] [class*="bg-sky-"],
+[data-theme="dark"] [class*="bg-blue-"],
+[data-theme="dark"] [class*="bg-indigo-"],
+[data-theme="dark"] [class*="bg-violet-"],
+[data-theme="dark"] [class*="bg-purple-"],
+[data-theme="dark"] [class*="bg-fuchsia-"],
+[data-theme="dark"] [class*="bg-pink-"],
+[data-theme="dark"] [class*="bg-rose-"],
+[data-theme="dark"] [class*="bg-red-"],
+[data-theme="dark"] [class*="bg-orange-"],
+[data-theme="dark"] [class*="bg-amber-"],
+[data-theme="dark"] [class*="bg-yellow-"],
+[data-theme="dark"] .bg-error,
+[data-theme="dark"] .bg-warning {
+  background-color: #171717 !important;
+}
+
+/* Status & pulse dots in dark mode */
+.dark .rounded-full[class*="bg-emerald-"],
+.dark .rounded-full[class*="bg-green-"],
+.dark .rounded-full[class*="bg-blue-"],
+.dark .rounded-full[class*="bg-sky-"],
+.dark .rounded-full[class*="bg-amber-"],
+.dark .rounded-full[class*="bg-rose-"],
+.dark .rounded-full[class*="bg-red-"],
+.dark .rounded-full.bg-link,
+[data-theme="dark"] .rounded-full[class*="bg-emerald-"],
+[data-theme="dark"] .rounded-full[class*="bg-green-"],
+[data-theme="dark"] .rounded-full[class*="bg-blue-"],
+[data-theme="dark"] .rounded-full[class*="bg-sky-"],
+[data-theme="dark"] .rounded-full[class*="bg-amber-"],
+[data-theme="dark"] .rounded-full[class*="bg-rose-"],
+[data-theme="dark"] .rounded-full[class*="bg-red-"],
+[data-theme="dark"] .rounded-full.bg-link {
+  background-color: #ffffff !important;
+}
+
+/* 4. Overrides for any chromatic borders & rings in dark mode */
+.dark [class*="border-emerald-"],
+.dark [class*="border-green-"],
+.dark [class*="border-teal-"],
+.dark [class*="border-cyan-"],
+.dark [class*="border-sky-"],
+.dark [class*="border-blue-"],
+.dark [class*="border-indigo-"],
+.dark [class*="border-violet-"],
+.dark [class*="border-purple-"],
+.dark [class*="border-fuchsia-"],
+.dark [class*="border-pink-"],
+.dark [class*="border-rose-"],
+.dark [class*="border-red-"],
+.dark [class*="border-orange-"],
+.dark [class*="border-amber-"],
+.dark [class*="border-yellow-"],
+.dark .border-error,
+.dark .border-warning,
+.dark [class*="ring-emerald-"],
+.dark [class*="ring-green-"],
+.dark [class*="ring-teal-"],
+.dark [class*="ring-cyan-"],
+.dark [class*="ring-sky-"],
+.dark [class*="ring-blue-"],
+.dark [class*="ring-indigo-"],
+.dark [class*="ring-violet-"],
+.dark [class*="ring-purple-"],
+.dark [class*="ring-fuchsia-"],
+.dark [class*="ring-pink-"],
+.dark [class*="ring-rose-"],
+.dark [class*="ring-red-"],
+.dark [class*="ring-orange-"],
+.dark [class*="ring-amber-"],
+.dark [class*="ring-yellow-"],
+[data-theme="dark"] [class*="border-emerald-"],
+[data-theme="dark"] [class*="border-green-"],
+[data-theme="dark"] [class*="border-sky-"],
+[data-theme="dark"] [class*="border-blue-"],
+[data-theme="dark"] [class*="border-purple-"],
+[data-theme="dark"] [class*="border-rose-"],
+[data-theme="dark"] [class*="border-red-"],
+[data-theme="dark"] [class*="border-amber-"],
+[data-theme="dark"] [class*="ring-emerald-"],
+[data-theme="dark"] [class*="ring-blue-"],
+[data-theme="dark"] [class*="ring-rose-"] {
+  border-color: #2b2b2b !important;
+  --tw-ring-color: #2b2b2b !important;
+}
+
+/* Hover overrides in dark mode */
+.dark [class*="hover:bg-red-"]:hover,
+.dark [class*="hover:bg-emerald-"]:hover,
+.dark [class*="hover:bg-blue-"]:hover,
+.dark [class*="hover:bg-amber-"]:hover,
+[data-theme="dark"] [class*="hover:bg-red-"]:hover,
+[data-theme="dark"] [class*="hover:bg-emerald-"]:hover,
+[data-theme="dark"] [class*="hover:bg-blue-"]:hover,
+[data-theme="dark"] [class*="hover:bg-amber-"]:hover {
+  background-color: #262626 !important;
+}
+
+.dark [class*="hover:text-blue-"]:hover,
+.dark [class*="hover:text-emerald-"]:hover,
+[data-theme="dark"] [class*="hover:text-blue-"]:hover,
+[data-theme="dark"] [class*="hover:text-emerald-"]:hover {
+  color: #ffffff !important;
+}
+
+/* 5. SVGs and Sparklines: pure white strokes and dots in dark mode */
+.dark svg path[stroke="#10b981"],
+.dark svg path[stroke="#0284c7"],
+.dark svg path[stroke="#d97706"],
+.dark svg path[stroke="#e11d48"],
+.dark svg circle[stroke="#10b981"],
+.dark svg circle[stroke="#0284c7"],
+.dark svg circle[stroke="#d97706"],
+.dark svg circle[stroke="#e11d48"],
+[data-theme="dark"] svg path[stroke="#10b981"],
+[data-theme="dark"] svg path[stroke="#0284c7"],
+[data-theme="dark"] svg path[stroke="#d97706"],
+[data-theme="dark"] svg path[stroke="#e11d48"],
+[data-theme="dark"] svg circle[stroke="#10b981"],
+[data-theme="dark"] svg circle[stroke="#0284c7"],
+[data-theme="dark"] svg circle[stroke="#d97706"],
+[data-theme="dark"] svg circle[stroke="#e11d48"] {
+  stroke: #ffffff !important;
+}
+
+.dark svg circle[fill="#10b981"],
+.dark svg circle[fill="#0284c7"],
+.dark svg circle[fill="#d97706"],
+.dark svg circle[fill="#e11d48"],
+[data-theme="dark"] svg circle[fill="#10b981"],
+[data-theme="dark"] svg circle[fill="#0284c7"],
+[data-theme="dark"] svg circle[fill="#d97706"],
+[data-theme="dark"] svg circle[fill="#e11d48"] {
+  fill: #ffffff !important;
+}
+
+.dark stop[stop-color="#10b981"],
+.dark stop[stop-color="#0284c7"],
+.dark stop[stop-color="#d97706"],
+.dark stop[stop-color="#e11d48"],
+[data-theme="dark"] stop[stop-color="#10b981"],
+[data-theme="dark"] stop[stop-color="#0284c7"],
+[data-theme="dark"] stop[stop-color="#d97706"],
+[data-theme="dark"] stop[stop-color="#e11d48"] {
+  stop-color: #ffffff !important;
 }
 
 /* Subtle scrollbars */

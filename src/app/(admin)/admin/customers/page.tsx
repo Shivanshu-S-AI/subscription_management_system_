@@ -175,7 +175,7 @@ export default async function CustomersPage({
                           {subs.length} total
                         </span>
                         {activeSubs.length > 0 && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 ring-1 ring-inset ring-emerald-600/20 dark:ring-emerald-500/20">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-white/10 text-emerald-700 dark:text-white ring-1 ring-inset ring-emerald-600/20 dark:ring-white/20">
                             {activeSubs.length} active
                           </span>
                         )}

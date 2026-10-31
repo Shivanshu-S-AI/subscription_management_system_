@@ -110,7 +110,7 @@ export default function QuotationTemplatesPage() {
                           <span className="font-medium text-slate-700 dark:text-slate-200 truncate pr-2">
                             {prod?.name || "Product"}{" "}
                             {variant && (
-                              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                              <span className="text-emerald-600 dark:text-white font-semibold">
                                 ({variant.name})
                               </span>
                             )}
@@ -128,7 +128,7 @@ export default function QuotationTemplatesPage() {
               {/* Card Footer Action */}
               <footer className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end text-xs">
                 <Link
-                  className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 inline-flex items-center gap-1 transition-colors group-hover:translate-x-0.5 transform duration-150"
+                  className="text-sm font-semibold text-blue-600 dark:text-white hover:text-blue-700 dark:hover:text-slate-200 inline-flex items-center gap-1 transition-colors group-hover:translate-x-0.5 transform duration-150"
                   href={`/admin/quotations/new?templateId=${tpl.id}`}
                 >
                   <span>Use in Quote</span>

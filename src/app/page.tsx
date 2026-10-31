@@ -6,6 +6,7 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { Pricing } from "@/components/landing/pricing";
 import { FAQ } from "@/components/landing/faq";
 import { CTASection } from "@/components/landing/cta-section";
+import SmoothScrollSection from "@/components/ui/smooth-scroll";
 
 export default function LandingPage() {
   return (
@@ -13,30 +14,32 @@ export default function LandingPage() {
       {/* A. Navbar */}
       <Navbar />
 
-      {/* Main Page Flow */}
-      <main className="flex-1">
+      {/* Main Page Flow with Lenis Smooth Scrolling and Reactive Card Stacking */}
+      <div className="flex-1">
         {/* B. Hero Section */}
         <Hero />
 
-        {/* C. Core Capabilities */}
+        {/* C. Interactive Smooth Scroll Card Stacking Showcase */}
+        <SmoothScrollSection id="showcase" />
+
+        {/* D. Core Capabilities */}
         <Capabilities />
 
-        {/* D. How It Works */}
+        {/* E. How It Works */}
         <HowItWorks />
 
-        {/* E. Pricing */}
+        {/* F. Pricing */}
         <Pricing />
 
-        {/* F. FAQ */}
+        {/* G. FAQ */}
         <FAQ />
 
-        {/* G. Final CTA */}
+        {/* H. Final CTA */}
         <CTASection />
-      </main>
+      </div>
 
-      {/* H. Footer */}
+      {/* I. Footer */}
       <Footer />
     </div>
   );
 }
-

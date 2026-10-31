@@ -561,6 +561,55 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 18: Lenis Smooth Scrolling & Interactive Sticky-Card Stacking Animation
+- **Dependency Integration:**
+  - Installed `lenis` for high-performance inertial smooth momentum scrolling with `ReactLenis`.
+- **Component Architecture (`src/components/ui/` & `components/ui/`):**
+  - Created [`smooth-scroll.tsx`](file:///Users/aryan/Desktop/Hackathon/src/components/ui/smooth-scroll.tsx) integrating `<ReactLenis root>` with configurable interpolation and duration.
+  - Implemented 3-stage sticky card stacking animation with radial grid mask backgrounds (`bg-[size:54px_54px]`) and progressive depth:
+    1. **Data Exploration & Insights:** Dark slate surface with Unsplash data analytics dashboard asset and Lucide `Database` badge.
+    2. **Advanced Visualization:** Light/dark contrasting stacked card with Unsplash visual analytics asset and Lucide `BarChart3` badge.
+    3. **Executive Reporting:** Deep elevated surface with Unsplash system architecture asset and Lucide `Sparkles` badge.
+  - Created [`demo.tsx`](file:///Users/aryan/Desktop/Hackathon/src/components/ui/demo.tsx) exposing `DemoOne` demo preview.
+  - Integrated into the public landing page ([`src/app/page.tsx`](file:///Users/aryan/Desktop/Hackathon/src/app/page.tsx)) elevating the landing page scroll experience with smooth momentum scrolling.
+- **Verification:**
+  - All 43 automated unit & integration tests passing (`npm test`).
+  - Zero TypeScript or lint errors in production build (`npm run build`).
+  - Dev server running and verified responsive at `http://localhost:3001`.
+
+---
+
+### Milestone 19: Strict Monochromatic Black and White Dark Mode Enforcement
+- **Universal Monochromatic Color Ladder & CSS Variables (`src/app/globals.css`):**
+  - Updated dark mode theme variables under `.dark` and `[data-theme="dark"]`:
+    - Set `--link` and `--link-deep` to pure white (`255 255 255`) and `--link-soft` to dark neutral gray (`38 38 38`).
+    - Redesigned `.hero-mesh-gradient` in dark mode to use subtle monochromatic white/grayscale radial glows on pure pitch black canvas, eliminating all chromatic tints (teal, blue, purple, magenta, yellow).
+    - Removed chromatic text overrides (e.g., `.dark .text-emerald-600 { color: #34d399 !important; }`).
+- **Comprehensive Dark Mode Monochrome CSS Rules:**
+  - Enforced pure white text (`#ededed !important`) and muted grayscale (`#a3a3a3 !important`) across all chromatic text utility classes (`text-emerald-*`, `text-green-*`, `text-blue-*`, `text-sky-*`, `text-amber-*`, `text-rose-*`, `text-red-*`, `text-purple-*`, `text-error`, `text-warning`, `text-violet`, `text-cyan`).
+  - Enforced deep neutral dark background (`#171717 !important` / `#0a0a0a !important`) across all chromatic background classes.
+  - Enforced neutral hairline border and ring colors (`#2b2b2b !important`) across all chromatic borders and focus rings.
+  - Enforced pure white status/pulse indicator dots in dark mode (`#ffffff !important`).
+  - Enforced stark black-and-white selection highlight (`background: #ffffff !important; color: #000000 !important;`).
+- **SVG Charts & Sparklines Monochromatic Conversion:**
+  - Mapped all SVG line paths, sparkline strokes, and data point circles in dark mode to crisp white (`#ffffff !important; stroke: #ffffff !important;`).
+  - Mapped gradient stops to white with smooth opacity falloff.
+  - Updated `DashboardSparkline` and `DashboardView` tooltips with pure white indicators.
+- **Component-Level Dark Mode Refinements:**
+  - **Theme Toggle (`src/components/theme-toggle.tsx`):** Changed dark mode sun icon from amber (`text-amber-400`) to pure white (`text-white`).
+  - **Overview Dashboard (`src/components/admin/dashboard-view.tsx`):** Refactored KPI card icons, badges (`live recurring`, `unpaid`, `Requires action`), percentage change indicators, overdue alerts, and table status badges to pure monochrome in dark mode.
+  - **Smooth Scroll Showcase (`src/components/ui/smooth-scroll.tsx`):** Styled section badges, borders, and backdrop surfaces to pure pitch black `#000000` and crisp white in dark mode.
+  - **Admin & Staff Headers:** Standardized `OPS READY` and `STAFF` role pills to monochromatic styling in dark mode.
+  - **Admin Catalog & Lifecycle Tables:** Updated status badges across Customers, Products, Subscriptions, Plans, Taxes, Discounts, Quotations, and Quotation Templates to use crisp monochrome styling (`dark:text-white dark:bg-white/10 dark:border-white/20`).
+- **Preservation of Light Mode:**
+  - Light mode retains all standard semantic colors (emerald green, blue, amber, rose) without any regression.
+- **Verification:**
+  - All 43 automated unit & integration tests passing (`npm test`).
+  - Production build compiled successfully with 0 TypeScript/lint errors across 61 routes (`npm run build`).
+  - Dev server running cleanly on port 3001.
+
+---
+
 ## 3. Current Repository State
 
 - **Branch:** `main`

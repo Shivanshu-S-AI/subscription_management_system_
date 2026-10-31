@@ -170,10 +170,10 @@ export default async function QuotationsPage({
                     <span
                       className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold tracking-wide uppercase font-mono ${
                         q.status === "converted"
-                          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 ring-1 ring-inset ring-emerald-600/20 dark:ring-emerald-500/20"
+                          ? "bg-emerald-50 text-emerald-700 dark:bg-white/10 dark:text-white ring-1 ring-inset ring-emerald-600/20 dark:ring-white/20"
                           : q.status === "sent"
-                          ? "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 ring-1 ring-inset ring-blue-600/20 dark:ring-blue-500/20"
-                          : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 ring-1 ring-inset ring-slate-300 dark:ring-slate-700"
+                          ? "bg-blue-50 text-blue-700 dark:bg-white/10 dark:text-white ring-1 ring-inset ring-blue-600/20 dark:ring-white/20"
+                          : "bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-white ring-1 ring-inset ring-slate-300 dark:ring-white/20"
                       }`}
                     >
                       {q.status}

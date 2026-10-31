@@ -192,12 +192,12 @@ export default async function SubscriptionsPage({
               {subscriptions.map((s) => {
                 const statusColor =
                   s.status === "active"
-                    ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200/60 dark:border-emerald-800/60"
+                    ? "bg-emerald-50 dark:bg-white/10 text-emerald-700 dark:text-white border-emerald-200/60 dark:border-white/20"
                     : s.status === "confirmed"
-                    ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200/60 dark:border-blue-800/60"
+                    ? "bg-blue-50 dark:bg-white/10 text-blue-700 dark:text-white border-blue-200/60 dark:border-white/20"
                     : s.status === "paused"
-                    ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/60 dark:border-amber-800/60"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700";
+                    ? "bg-amber-50 dark:bg-white/10 text-amber-700 dark:text-white border-amber-200/60 dark:border-white/20"
+                    : "bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-white border-slate-200 dark:border-white/20";
 
                 return (
                   <tr

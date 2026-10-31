@@ -143,12 +143,12 @@ export default async function ProductsPage({
                 const typeUpper = p.type?.toUpperCase() || "SOFTWARE";
                 const badgeColor =
                   typeUpper === "SOFTWARE"
-                    ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200/60 dark:border-blue-800/60"
+                    ? "bg-blue-50 dark:bg-white/10 text-blue-700 dark:text-white border-blue-200/60 dark:border-white/20"
                     : typeUpper === "ADDON"
-                    ? "bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200/60 dark:border-purple-800/60"
+                    ? "bg-purple-50 dark:bg-white/10 text-purple-700 dark:text-white border-purple-200/60 dark:border-white/20"
                     : typeUpper === "SERVICE"
-                    ? "bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200/60 dark:border-amber-800/60"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700";
+                    ? "bg-amber-50 dark:bg-white/10 text-amber-700 dark:text-white border-amber-200/60 dark:border-white/20"
+                    : "bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-white border-slate-200 dark:border-white/20";
 
                 return (
                   <tr
@@ -200,7 +200,7 @@ export default async function ProductsPage({
                               <span className="text-slate-700 dark:text-slate-300 font-medium truncate">
                                 {v.name}:
                               </span>
-                              <span className="font-semibold text-emerald-600 dark:text-emerald-400 shrink-0 font-mono">
+                              <span className="font-semibold text-emerald-600 dark:text-white shrink-0 font-mono">
                                 +{formatCurrency(v.price_adjustment)}
                               </span>
                             </div>
