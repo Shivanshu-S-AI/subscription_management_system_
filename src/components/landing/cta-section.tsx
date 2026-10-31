@@ -18,7 +18,7 @@ export function CTASection() {
 
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
-            href="#pricing"
+            href="/signup"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-ink px-8 py-3.5 text-sm font-medium text-white shadow-whisper transition-all hover:bg-black hover:scale-[1.01]"
           >
             Start Free Trial

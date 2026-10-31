@@ -88,6 +88,11 @@ export function Footer() {
                   Customer Login
                 </Link>
               </li>
+              <li>
+                <Link href="/internal-login" className="text-mute hover:text-ink transition-colors text-[11px]">
+                  Admin / Staff Login
+                </Link>
+              </li>
             </ul>
           </div>
 

@@ -1,0 +1,114 @@
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/modules/auth/service";
+import { signOutAction } from "@/modules/auth/actions";
+import { User, LogOut, FileText, RefreshCw, ArrowRight } from "lucide-react";
+import Link from "next/link";
+
+export default async function CustomerPortalDestinationPage() {
+  const { user, profile, role } = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login?redirect=/portal");
+  }
+
+  return (
+    <div className="min-h-screen bg-canvas flex flex-col justify-between p-6 sm:p-10 font-sans">
+      <div className="max-w-4xl mx-auto w-full">
+        {/* Header Bar */}
+        <header className="flex items-center justify-between border-b border-hairline pb-6 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-ink text-white shadow-whisper">
+              <User className="h-4 w-4" />
+            </div>
+            <div>
+              <h1 className="text-base font-semibold tracking-tight text-ink">
+                Brightloop Customer Portal
+              </h1>
+              <span className="font-mono text-xs text-mute">Subscriber Self-Service</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="rounded-full bg-slate-500/10 px-2.5 py-1 text-[11px] font-mono text-slate-700 font-medium uppercase">
+              ROLE: {role || "customer"}
+            </span>
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-hairline bg-canvas-elevated px-3 text-xs font-medium text-ink hover:bg-canvas transition-colors"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </form>
+          </div>
+        </header>
+
+        {/* Content Card */}
+        <main className="space-y-6">
+          <div className="rounded-md border border-hairline bg-canvas-elevated p-6 sm:p-8 shadow-whisper">
+            <span className="font-mono text-[11px] uppercase tracking-wider text-mute">
+              Customer Account
+            </span>
+            <h2 className="mt-2 text-2xl font-semibold tracking-[-0.4px] text-ink">
+              Welcome, {profile?.full_name || user.email}
+            </h2>
+            <p className="mt-2 text-sm text-body leading-relaxed max-w-2xl">
+              You are authenticated into your Brightloop customer workspace. In Phase 7, this portal will display your active data analysis subscriptions, renewal dates, payment history, and downloadable invoices.
+            </p>
+
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-hairline-soft text-xs">
+              <div className="p-3.5 rounded-sm bg-canvas border border-hairline">
+                <span className="font-mono text-mute block text-[10px] uppercase">Registered Email</span>
+                <span className="text-ink font-medium truncate block mt-1">
+                  {user.email}
+                </span>
+              </div>
+              <div className="p-3.5 rounded-sm bg-canvas border border-hairline">
+                <span className="font-mono text-mute block text-[10px] uppercase">Account Status</span>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                  <span className="font-medium text-ink">Active Customer</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Planned Features Preview */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="rounded-md border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+              <div className="flex items-center gap-2.5 mb-2">
+                <RefreshCw className="h-4 w-4 text-mute" />
+                <h3 className="font-sans text-sm font-semibold text-ink">
+                  Active Subscriptions
+                </h3>
+              </div>
+              <p className="text-xs text-body">
+                View your active subscription plans, seat allocations, next billing dates, and renewal status.
+              </p>
+            </div>
+
+            <div className="rounded-md border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+              <div className="flex items-center gap-2.5 mb-2">
+                <FileText className="h-4 w-4 text-mute" />
+                <h3 className="font-sans text-sm font-semibold text-ink">
+                  Billing & Invoices
+                </h3>
+              </div>
+              <p className="text-xs text-body">
+                Access itemized monthly and annual invoices with printable receipts and payment reconciliation records.
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <footer className="text-center text-xs text-mute py-4">
+        <Link href="/" className="hover:text-ink transition-colors inline-flex items-center gap-1">
+          <span>Return to Brightloop Homepage</span>
+          <ArrowRight className="h-3 w-3" />
+        </Link>
+      </footer>
+    </div>
+  );
+}

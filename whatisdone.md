@@ -63,31 +63,72 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 4: Phase 2 — Complete Authentication & RBAC System
+- **Supabase PostgreSQL & SSR Architecture:**
+  - Installed `@supabase/supabase-js` and `@supabase/ssr`.
+  - Configured typed Supabase clients:
+    - `src/lib/supabase/client.ts`: Browser client for client-side interactions.
+    - `src/lib/supabase/server.ts`: Server client with App Router cookie handling.
+    - `src/lib/supabase/admin.ts`: Service-role client for secure server-side role assignment.
+    - `src/lib/supabase/middleware.ts` & `middleware.ts`: Next.js middleware refreshing user sessions and enforcing role-based route boundaries.
+- **Database Schema & RLS Migrations:**
+  - Created `supabase/migrations/20261031_001_auth_profiles.sql`:
+    - `public.user_role` enum (`'admin'`, `'staff'`, `'customer'`).
+    - `public.profiles` table linked via foreign key to `auth.users(id)`.
+    - Automated trigger `handle_new_user()` ensuring every public registration is assigned the `'customer'` role on the database layer.
+    - Strict Row Level Security (RLS) policies preventing privilege escalation and securing user profile reads/updates.
+- **Strict Validation & Business Logic (`src/modules/auth/`):**
+  - `src/modules/auth/validation.ts`: Full password policy enforcement (>8 characters, uppercase, lowercase, special character) and email syntax validation.
+  - `src/modules/auth/actions.ts`: Server actions for `signUpCustomerAction`, `signInAction`, `internalSignInAction`, `forgotPasswordAction`, `resetPasswordAction`, and `signOutAction`.
+  - `src/modules/auth/service.ts`: Helpers for session retrieval and role destination mapping.
+- **Frontend Pages & Shared UI Components:**
+  - `src/components/auth/auth-card.tsx`: Minimal Geist card surface adhering to `DESIGN.md`.
+  - `src/components/auth/password-requirements.tsx`: Real-time interactive requirements indicator for customers creating or updating passwords.
+  - `src/app/(auth)/signup/page.tsx`: Customer registration route (`/signup`) with client & server validation and duplicate email handling.
+  - `src/app/(auth)/login/page.tsx`: Customer login route (`/login`) with remember-me, forgot-password link, and post-auth role redirection.
+  - `src/app/(auth)/forgot-password/page.tsx`: Password recovery route (`/forgot-password`) with confirmation screen.
+  - `src/app/(auth)/reset-password/page.tsx`: Dedicated password reset route (`/reset-password`) with token verification, expired link detection, and error banners.
+  - `src/app/(auth)/internal-login/page.tsx`: Shared login route (`/internal-login`) for Admin and Internal Staff with access restriction checks.
+  - Role Destination Placeholders:
+    - `src/app/(admin)/admin/page.tsx`: Verified Admin workspace placeholder with role badge and sign-out.
+    - `src/app/(admin)/staff/page.tsx`: Verified Staff workspace placeholder with operational permissions.
+    - `src/app/(portal)/portal/page.tsx`: Verified Customer Portal placeholder with subscriber details.
+- **Landing Page Navigation Integration:**
+  - Connected `Log In` → `/login`.
+  - Connected `Get Started` and `Start Free Trial` (Navbar, Hero, CTA section) → `/signup`.
+  - Added discreet `Admin / Staff Login` link in footer → `/internal-login`.
+- **Verification & Testing:**
+  - Automated unit test suite `tests/auth-validation.test.mjs` verifying 8 validation test cases (all passing).
+  - Production build `next build` executed with 100% success (zero lint or type errors).
+  - All routes (`/login`, `/signup`, `/forgot-password`, `/reset-password`, `/internal-login`) verified with HTTP 200 responses.
+
+---
+
 ## 3. Current Repository State
 
-- **Branch:** `main` (synchronized with `origin/main`).
+- **Branch:** `main`
 - **Working Tree:**
-  - `src/app/`: Root layout, global styling, and landing page (`page.tsx`).
-  - `src/components/`: Reusable layout (`navbar`, `footer`) and landing sections (`hero`, `capabilities`, `how-it-works`, `pricing`, `faq`, `cta-section`).
-  - `src/lib/utils.ts`: Tailwind class merger (`cn`) and currency/date formatters.
+  - `src/app/`: Public marketing landing page, authentication routes (`/signup`, `/login`, `/forgot-password`, `/reset-password`, `/internal-login`), and role destinations (`/admin`, `/staff`, `/portal`).
+  - `src/components/`: Layout (`navbar`, `footer`), landing sections, and auth components (`auth-card`, `password-requirements`).
+  - `src/modules/auth/`: Validation rules, server actions, services, and types.
+  - `src/lib/`: Supabase SSR client/server/admin/middleware and role constants.
+  - `supabase/migrations/`: Initial RBAC schema and RLS policies migration.
+  - `tests/`: Automated authentication test suite.
   - Documentation: `README.md`, `AGENTS.md`, `DESIGN.md`, `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_PLAN.md`, `whatisdone.md`.
 
 ---
 
-## 4. Next Implementation Steps (Phase 2 & Beyond)
+## 4. Next Implementation Steps (Phase 3 & Beyond)
 
 As outlined in `DEVELOPMENT_PLAN.md`:
 
-1. **Phase 2 — Core Foundation & Authentication System:**
-   - Configure Supabase environment variables (`.env.local`).
-   - Create initial database migration: `public.profiles` linked to Supabase Auth with roles (`admin`, `staff`, `customer`).
-   - Implement Supabase SSR helpers in `src/lib/supabase/`.
-   - Build authentication pages: `/login`, `/signup` (with >8 character password validation), and password recovery.
-   - Implement role-based redirection middleware.
-2. **Phase 3 — Catalog, Plans, Taxes & Discounts (Admin Module).**
-3. **Phase 4 — Quotations & Subscription Management.**
-4. **Phase 5 — Billing & Invoicing Engine.**
-5. **Phase 6 — Payment Tracking & Reconciliation.**
-6. **Phase 7 — Customer Self-Service Portal.**
-7. **Phase 8 — Financial Dashboard & Reporting.**
-8. **Phase 9 — End-to-End Verification & Polish.**
+1. **Phase 3 — Catalog, Plans, Taxes & Discounts (Admin Module):**
+   - Products management with sales price, cost price, notes, and variants (e.g. brand additions).
+   - Recurring plans (daily, weekly, monthly, yearly) and lifecycle policies (auto-close, pause, renew).
+   - Admin tax rules and discount rules engine.
+2. **Phase 4 — Quotations & Subscription Management.**
+3. **Phase 5 — Billing & Invoicing Engine.**
+4. **Phase 6 — Payment Tracking & Reconciliation.**
+5. **Phase 7 — Customer Self-Service Portal.**
+6. **Phase 8 — Financial Dashboard & Reporting.**
+7. **Phase 9 — End-to-End Verification & Polish.**
