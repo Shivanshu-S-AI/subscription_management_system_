@@ -499,6 +499,8 @@ This document serves as the single tracking record for all past ("old") and curr
     - Floating Tooltip: Scaled to `rounded-sm px-2 py-1 text-[11px] font-mono`.
 - **Theme & Cross-Workspace Consistency:**
   - Confirmed perfect visual alignment in both Dark Mode and Light Mode with zero font mismatch across the entire admin workspace.
+- **Design Inspiration References:**
+  - Preserved design reference assets for dashboard and customer directory in repository (`customers/`, `dashboard/`, `inspiration/`).
 - **Automated Verification:**
   - Tested and captured live screenshots via Chrome DevTools MCP on `http://localhost:3000/admin` and `http://localhost:3000/admin/plans`.
   - All 43 unit and integration tests passing (`npm test`).
