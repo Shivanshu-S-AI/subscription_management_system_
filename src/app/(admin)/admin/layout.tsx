@@ -9,7 +9,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, role } = await getCurrentUser();
+  const { user, profile, role } = await getCurrentUser();
 
   if (!user) {
     redirect("/internal-login?redirect=/admin");
@@ -24,5 +24,12 @@ export default async function AdminLayout({
     }
   }
 
-  return <AdminLayoutClient>{children}</AdminLayoutClient>;
+  return (
+    <AdminLayoutClient
+      userName={profile?.full_name || undefined}
+      userEmail={profile?.email || undefined}
+    >
+      {children}
+    </AdminLayoutClient>
+  );
 }

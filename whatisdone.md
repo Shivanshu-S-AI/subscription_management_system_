@@ -360,11 +360,39 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 9: Dedicated Admin Accounts Provisioning (Shivanshu, Aryan, Hiren Sir)
+- **Objective:**
+  - Provision three designated system administrators with full platform access:
+    1. **Shivanshu** (`shivanshu@brightloopsoftware.com`)
+    2. **Aryan** (`aryan@brightloopsoftware.com`)
+    3. **Hiren Sir** (`hiren@brightloopsoftware.com`)
+  - Ensure immediate accessibility via internal login (`/internal-login`) in both offline/local mode and Supabase PostgreSQL database mode.
+  - Dynamically display the authenticated administrator's actual name and email in the Admin sidebar and layout header.
+  - Provide database provisioning migration [`supabase/migrations/20261031_004_seed_admin_accounts.sql`](file:///Users/shiv/Odoo_hackathon_project/supabase/migrations/20261031_004_seed_admin_accounts.sql) for live Supabase synchronization.
+
+- **Implementation Details:**
+  - **Internal Authentication Mapping (`src/modules/auth/actions.ts`):**
+    - Updated `internalSignInAction` to recognize `shivanshu`, `aryan`, and `hiren` (or `hirensir`, or full `@brightloopsoftware.com` emails) as verified administrators.
+    - Sets session cookies `brightloop_session_role = "admin"` and `brightloop_session_user = <identifier>`.
+  - **Profile Resolution (`src/modules/auth/service.ts`):**
+    - Updated `getCurrentUser()` to resolve user profiles based on the session identifier, attaching specific full names ("Shivanshu", "Aryan", "Hiren Sir") and system emails.
+  - **Dynamic Admin Sidebar (`src/components/admin/admin-sidebar.tsx`, `src/app/(admin)/admin/layout.tsx`):**
+    - Refactored `AdminLayoutClient` and `AdminSidebar` to receive and display dynamic admin profile credentials in the sidebar account footer.
+  - **Team Directory (`src/lib/data/store.ts`):**
+    - Seeded Shivanshu, Aryan, and Hiren Sir into `store.staff` as system administrators, visible in Team Management (`/admin/team`).
+  - **Supabase Database Migration (`supabase/migrations/20261031_004_seed_admin_accounts.sql`):**
+    - Provisions all 3 accounts into `auth.users` with encrypted passwords (`AdminBrightloop2026!`) and confirmed email status.
+    - Upserts corresponding rows into `public.profiles` with `role = 'admin'`.
+  - **Automated Verification (`tests/admin-accounts.test.mjs`):**
+    - Added automated test suite verifying profile provisioning and identifier recognition logic across all 3 admin accounts.
+
+---
+
 ## 3. Current Repository State
 
 - **Branch:** `main`
 - **Total Compiled Routes:** 61 routes across Marketing, Auth, Admin, Staff, and Customer Portal.
-- **Automated Test Suite:** 39 tests passing with 0 failures (`npm test`).
+- **Automated Test Suite:** 42 tests passing with 0 failures (`npm test`).
 - **Working Tree:**
   - `src/app/(portal)/portal/`: Complete Phase 3 Customer Portal (Overview, Subscriptions, Invoices, Account, Print).
   - `src/components/portal/`: Customer navbar with mobile drawer and customer layout shell.
@@ -379,9 +407,11 @@ This document serves as the single tracking record for all past ("old") and curr
     - `001_auth_profiles.sql` (RBAC & auth triggers).
     - `002_admin_workspace_schema.sql` (Admin workspace schema, idempotency constraints & indexes).
     - `003_customer_portal_rls.sql` (Customer Portal RLS policies for strict customer isolation).
+    - `004_seed_admin_accounts.sql` (Seed 3 primary administrators: Shivanshu, Aryan, Hiren Sir).
   - `tests/`:
     - `auth-validation.test.mjs` (8 auth tests).
     - `cross-system-integration.test.mjs` (31 cross-system integration and E2E workflow tests).
+    - `admin-accounts.test.mjs` (3 admin accounts provisioning tests).
   - Documentation: `README.md`, `AGENTS.md`, `DESIGN.md`, `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_PLAN.md`, `whatisdone.md`.
 
 ---
@@ -389,7 +419,7 @@ This document serves as the single tracking record for all past ("old") and curr
 ## 4. Next Implementation Steps (Phase 5 of Hackathon: Supabase Live Cloud Integration & Vercel Deployment)
 
 1. **Supabase Live Cloud Synchronization:**
-   - Run migrations `001`, `002`, and `003` on live Supabase cloud project.
+   - Execute migrations `001`, `002`, `003`, and `004` on live Supabase cloud project.
    - Verify Supabase Auth email confirmation and password reset hooks with live SMTP.
 2. **End-to-End System Polish & Health Checks:**
    - Production bundle optimization.

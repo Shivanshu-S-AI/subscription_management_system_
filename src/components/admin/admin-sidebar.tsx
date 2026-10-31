@@ -83,9 +83,13 @@ const navGroups: NavGroup[] = [
 export function AdminSidebar({
   isOpen,
   onClose,
+  userName,
+  userEmail,
 }: {
   isOpen?: boolean;
   onClose?: () => void;
+  userName?: string;
+  userEmail?: string;
 }) {
   const pathname = usePathname();
 
@@ -177,10 +181,10 @@ export function AdminSidebar({
             <div className="flex items-center justify-between">
               <div className="min-w-0">
                 <span className="block text-xs font-medium text-ink truncate">
-                  Administrator
+                  {userName || "Administrator"}
                 </span>
                 <span className="block font-mono text-[10px] text-mute truncate">
-                  admin@brightloop.com
+                  {userEmail || "admin@brightloopsoftware.com"}
                 </span>
               </div>
               <form action={signOutAction}>

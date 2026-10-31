@@ -14,15 +14,38 @@ export async function getCurrentUser(): Promise<{
 }> {
   const cookieStore = await cookies();
   const devSessionRole = cookieStore.get("brightloop_session_role")?.value as UserRole | undefined;
+  const devSessionUser = cookieStore.get("brightloop_session_user")?.value;
 
   // Support local dev / demo session
   if (devSessionRole === "admin" || devSessionRole === "staff" || devSessionRole === "customer") {
     const isDevAdmin = devSessionRole === "admin";
     const isDevStaff = devSessionRole === "staff";
+
+    let adminName = "Brightloop Administrator";
+    let adminEmail = "admin@brightloopsoftware.com";
+    let adminId = "admin-dev-id";
+
+    if (devSessionUser) {
+      const u = devSessionUser.toLowerCase().trim();
+      if (u === "shivanshu" || u.startsWith("shivanshu@")) {
+        adminName = "Shivanshu";
+        adminEmail = "shivanshu@brightloopsoftware.com";
+        adminId = "admin-shivanshu";
+      } else if (u === "aryan" || u.startsWith("aryan@")) {
+        adminName = "Aryan";
+        adminEmail = "aryan@brightloopsoftware.com";
+        adminId = "admin-aryan";
+      } else if (u === "hiren" || u === "hirensir" || u.startsWith("hiren@")) {
+        adminName = "Hiren Sir";
+        adminEmail = "hiren@brightloopsoftware.com";
+        adminId = "admin-hiren";
+      }
+    }
+
     const devUser = {
-      id: isDevAdmin ? "admin-dev-id" : isDevStaff ? "staff-dev-id" : "cust-001",
+      id: isDevAdmin ? adminId : isDevStaff ? "staff-dev-id" : "cust-001",
       email: isDevAdmin
-        ? "admin@brightloop.com"
+        ? adminEmail
         : isDevStaff
         ? "staff@brightloopsoftware.com"
         : "finance@apexcloud.io",
@@ -31,7 +54,7 @@ export async function getCurrentUser(): Promise<{
       id: devUser.id,
       email: devUser.email,
       full_name: isDevAdmin
-        ? "Brightloop Administrator"
+        ? adminName
         : isDevStaff
         ? "Operations Staff"
         : "Sarah Jenkins (Apex Cloud)",

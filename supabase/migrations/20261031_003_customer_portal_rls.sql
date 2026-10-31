@@ -71,3 +71,4 @@ DROP POLICY IF EXISTS "Customers can view own payments" ON public.payments;
 CREATE POLICY "Customers can view own payments"
   ON public.payments FOR SELECT
   USING (customer_id = auth.uid());
+

@@ -86,6 +86,33 @@ function initializeSeedData() {
 
   const staff: CustomerProfile[] = [
     {
+      id: "admin-001",
+      email: "shivanshu@brightloopsoftware.com",
+      full_name: "Shivanshu",
+      company_name: "Brightloop Software",
+      role: "admin",
+      created_at: "2026-06-01T08:00:00Z",
+      updated_at: "2026-06-01T08:00:00Z",
+    },
+    {
+      id: "admin-002",
+      email: "aryan@brightloopsoftware.com",
+      full_name: "Aryan",
+      company_name: "Brightloop Software",
+      role: "admin",
+      created_at: "2026-06-01T08:00:00Z",
+      updated_at: "2026-06-01T08:00:00Z",
+    },
+    {
+      id: "admin-003",
+      email: "hiren@brightloopsoftware.com",
+      full_name: "Hiren Sir",
+      company_name: "Brightloop Software",
+      role: "admin",
+      created_at: "2026-06-01T08:00:00Z",
+      updated_at: "2026-06-01T08:00:00Z",
+    },
+    {
       id: "staff-001",
       email: "staff@brightloopsoftware.com",
       full_name: "Alex Rivera",

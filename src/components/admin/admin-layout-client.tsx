@@ -4,7 +4,15 @@ import { useState } from "react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminHeader } from "@/components/admin/admin-header";
 
-export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
+export function AdminLayoutClient({
+  children,
+  userName,
+  userEmail,
+}: {
+  children: React.ReactNode;
+  userName?: string;
+  userEmail?: string;
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -13,6 +21,8 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
       <AdminSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        userName={userName}
+        userEmail={userEmail}
       />
 
       {/* Main Container */}

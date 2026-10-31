@@ -183,14 +183,23 @@ export async function internalSignInAction(
 
   // Seamless dev/local authentication support
   if (!supabaseUrl || supabaseUrl.includes("placeholder")) {
-    const lower = identifier.toLowerCase();
-    const isAdmin = lower.includes("admin");
-    const isStaff = lower.includes("staff");
+    const lower = identifier.toLowerCase().trim();
+    const isAdminUser =
+      lower === "shivanshu" ||
+      lower.startsWith("shivanshu@") ||
+      lower === "aryan" ||
+      lower.startsWith("aryan@") ||
+      lower === "hiren" ||
+      lower === "hirensir" ||
+      lower.startsWith("hiren@") ||
+      lower.includes("admin");
+    const isStaffUser = lower.includes("staff") || lower === "alex" || lower === "james";
 
-    if (isAdmin || isStaff) {
-      const assignedRole = isAdmin ? "admin" : "staff";
+    if (isAdminUser || isStaffUser) {
+      const assignedRole: UserRole = isAdminUser ? "admin" : "staff";
       const cookieStore = await cookies();
       cookieStore.set("brightloop_session_role", assignedRole, { path: "/" });
+      cookieStore.set("brightloop_session_user", lower, { path: "/" });
       const dest = redirectTarget || ROLE_DESTINATIONS[assignedRole];
       redirect(dest);
     }
@@ -318,6 +327,7 @@ export async function signOutAction() {
   const cookieStore = await cookies();
   const currentRole = cookieStore.get("brightloop_session_role")?.value;
   cookieStore.delete("brightloop_session_role");
+  cookieStore.delete("brightloop_session_user");
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (supabaseUrl && !supabaseUrl.includes("placeholder")) {
