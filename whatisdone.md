@@ -508,6 +508,14 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 15: Local Network (LAN) Hosting Configuration
+- **Network Interface Binding:**
+  - Configured Next.js server in `package.json` (`dev` and `start` scripts) to bind to host `0.0.0.0` on port `3000`.
+  - Enables seamless cross-device testing and access from other computers, phones, or tablets on the same local network / Wi-Fi via `http://<local-ip>:3000` (e.g. `http://10.44.158.96:3000`).
+  - Verified local firewall is disabled and confirmed HTTP 200 response on `10.44.158.96:3000`.
+
+---
+
 ## 3. Current Repository State
 
 - **Branch:** `main`
