@@ -25,3 +25,4 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+

@@ -220,3 +220,4 @@ export default async function StaffInvoicesPage({
     </div>
   );
 }
+

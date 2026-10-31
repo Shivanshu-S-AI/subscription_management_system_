@@ -182,3 +182,4 @@ export function StaffHeader({ onMenuClick }: { onMenuClick?: () => void }) {
     </header>
   );
 }
+
