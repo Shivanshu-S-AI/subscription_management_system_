@@ -4,6 +4,10 @@ This document outlines the operational rules and standards for all AI agents wor
 
 ---
 
+
+please git pull before working and git push after working.... 
+keep updating old and new system changes to whatisdone.md file.. so we can understand where we left off and other people working with agents and their agents know what is done and have some context.. visit that file to for context.. 
+
 ## 1. Core Operating Principles
 
 1. **Verify with Automation Tools & Screenshots (Pragmatic & Balanced):**

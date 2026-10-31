@@ -98,3 +98,4 @@ export function FAQ() {
     </section>
   );
 }
+
