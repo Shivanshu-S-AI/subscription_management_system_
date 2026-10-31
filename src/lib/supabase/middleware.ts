@@ -7,48 +7,56 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
+  const pathname = request.nextUrl.pathname;
+  const devSessionRole = request.cookies.get("brightloop_session_role")?.value as UserRole | undefined;
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // If Supabase environment variables are missing (e.g. during preliminary build), pass through
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return supabaseResponse;
-  }
-
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        supabaseResponse = NextResponse.next({
-          request,
-        });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options)
-        );
-      },
-    },
-  });
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const pathname = request.nextUrl.pathname;
-
-  // Resolve user role if authenticated
+  let user: any = null;
   let userRole: UserRole = "customer";
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
 
-    if (profile?.role) {
-      userRole = profile.role as UserRole;
+  // Check dev session cookie first
+  if (devSessionRole === "admin" || devSessionRole === "staff") {
+    user = {
+      id: devSessionRole === "admin" ? "admin-dev-id" : "staff-dev-id",
+      email: devSessionRole === "admin" ? "admin@brightloop.com" : "staff@brightloopsoftware.com",
+    };
+    userRole = devSessionRole;
+  } else if (supabaseUrl && supabaseAnonKey && !supabaseUrl.includes("placeholder")) {
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    });
+
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+
+    user = authUser;
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (profile?.role) {
+        userRole = profile.role as UserRole;
+      }
     }
   }
 

@@ -1,113 +1,344 @@
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/modules/auth/service";
-import { signOutAction } from "@/modules/auth/actions";
-import { ShieldCheck, LogOut, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import {
+  Repeat,
+  DollarSign,
+  AlertTriangle,
+  Clock,
+  ArrowUpRight,
+  Plus,
+  Play,
+  CheckCircle,
+  TrendingUp,
+} from "lucide-react";
+import { getDashboardKPIs } from "@/lib/data/store";
+import { formatCurrency } from "@/lib/utils";
 
-export default async function AdminDestinationPage() {
-  const { user, profile, role } = await getCurrentUser();
-
-  if (!user) {
-    redirect("/internal-login?redirect=/admin");
-  }
-
-  if (role !== "admin") {
-    redirect(role === "staff" ? "/staff" : "/portal");
-  }
+export default function AdminOverviewDashboard() {
+  const kpis = getDashboardKPIs();
 
   return (
-    <div className="min-h-screen bg-canvas flex flex-col justify-between p-6 sm:p-10 font-sans">
-      <div className="max-w-4xl mx-auto w-full">
-        {/* Header Bar */}
-        <header className="flex items-center justify-between border-b border-hairline pb-6 mb-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-ink text-white shadow-whisper">
-              <ShieldCheck className="h-4 w-4" />
-            </div>
-            <div>
-              <h1 className="text-base font-semibold tracking-tight text-ink">
-                Brightloop Operations
-              </h1>
-              <span className="font-mono text-xs text-mute">Admin Control Surface</span>
-            </div>
-          </div>
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-hairline pb-5">
+        <div>
+          <span className="font-mono text-xs uppercase tracking-wider text-mute">
+            Operational Intelligence
+          </span>
+          <h1 className="text-2xl font-semibold tracking-[-0.4px] text-ink mt-0.5">
+            Overview Dashboard
+          </h1>
+          <p className="text-xs text-body mt-1">
+            Real-time subscription metrics, cashflow reconciliation, and billing operations.
+          </p>
+        </div>
 
-          <div className="flex items-center gap-3">
-            <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-mono text-emerald-600 font-medium">
-              ROLE: ADMIN
-            </span>
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-hairline bg-canvas-elevated px-3 text-xs font-medium text-ink hover:bg-canvas transition-colors"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                <span>Sign Out</span>
-              </button>
-            </form>
-          </div>
-        </header>
-
-        {/* Content Card */}
-        <main className="space-y-6">
-          <div className="rounded-md border border-hairline bg-canvas-elevated p-6 sm:p-8 shadow-whisper">
-            <span className="font-mono text-[11px] uppercase tracking-wider text-mute">
-              Authentication & Role Verified
-            </span>
-            <h2 className="mt-2 text-2xl font-semibold tracking-[-0.4px] text-ink">
-              Welcome, {profile?.full_name || user.email}
-            </h2>
-            <p className="mt-2 text-sm text-body leading-relaxed max-w-2xl">
-              You are signed in with the pre-provisioned Administrator account. Full business management modules (Products, Variants, Plans, Quotation Templates, Taxes, and Discounts) will be implemented in Phases 3 through 5.
-            </p>
-
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-hairline-soft text-xs">
-              <div className="p-3 rounded-sm bg-canvas border border-hairline">
-                <span className="font-mono text-mute block text-[10px] uppercase">User ID</span>
-                <span className="font-mono text-ink font-medium truncate block mt-1">
-                  {user.id}
-                </span>
-              </div>
-              <div className="p-3 rounded-sm bg-canvas border border-hairline">
-                <span className="font-mono text-mute block text-[10px] uppercase">Account Email</span>
-                <span className="text-ink font-medium truncate block mt-1">
-                  {user.email}
-                </span>
-              </div>
-              <div className="p-3 rounded-sm bg-canvas border border-hairline">
-                <span className="font-mono text-mute block text-[10px] uppercase">Assigned Scope</span>
-                <span className="font-mono text-ink font-medium block mt-1">
-                  Unrestricted Superuser
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick links */}
-          <div className="rounded-md border border-hairline bg-canvas-elevated p-6 shadow-whisper">
-            <h3 className="text-xs font-mono uppercase tracking-wider text-mute mb-4">
-              Upcoming Operational Modules
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div className="flex items-center justify-between p-3 rounded-sm border border-hairline bg-canvas text-body">
-                <span>Phase 3: Catalog, Plans, Taxes & Discounts</span>
-                <span className="text-[10px] font-mono text-mute">NEXT</span>
-              </div>
-              <div className="flex items-center justify-between p-3 rounded-sm border border-hairline bg-canvas text-body">
-                <span>Phase 4: Quotations & Subscription Management</span>
-                <span className="text-[10px] font-mono text-mute">PENDING</span>
-              </div>
-            </div>
-          </div>
-        </main>
+        {/* Header Action Buttons */}
+        <div className="flex items-center gap-2.5">
+          <Link
+            href="/admin/billing"
+            className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-ink px-3 text-xs font-medium text-white shadow-whisper hover:bg-black transition-colors"
+          >
+            <Play className="h-3.5 w-3.5" />
+            <span>Process Billing</span>
+          </Link>
+          <Link
+            href="/admin/quotations/new"
+            className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-hairline bg-canvas-elevated px-3 text-xs font-medium text-ink shadow-whisper hover:bg-canvas transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>New Quote</span>
+          </Link>
+        </div>
       </div>
 
-      <footer className="text-center text-xs text-mute py-4">
-        <Link href="/" className="hover:text-ink transition-colors inline-flex items-center gap-1">
-          <span>Return to Public Homepage</span>
-          <ArrowRight className="h-3 w-3" />
-        </Link>
-      </footer>
+      {/* 4 Required Primary KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* KPI 1: Active Subscriptions */}
+        <div className="rounded-md border border-hairline bg-canvas-elevated p-5 shadow-whisper">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[11px] uppercase tracking-wider text-mute">
+              Active Subscriptions
+            </span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-emerald-500/10 text-emerald-600">
+              <Repeat className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-semibold tracking-tight text-ink">
+              {kpis.activeSubscriptionsCount}
+            </span>
+            <span className="text-xs text-emerald-600 font-mono">live recurring</span>
+          </div>
+          <p className="mt-2 text-[11px] text-mute">
+            Live client contracts generating recurring cashflow
+          </p>
+        </div>
+
+        {/* KPI 2: Revenue Received */}
+        <div className="rounded-md border border-hairline bg-canvas-elevated p-5 shadow-whisper">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[11px] uppercase tracking-wider text-mute">
+              Revenue Received
+            </span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-link/10 text-link">
+              <DollarSign className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-semibold tracking-tight text-ink">
+              {formatCurrency(kpis.revenueReceivedTotal)}
+            </span>
+          </div>
+          <p className="mt-2 text-[11px] text-mute">
+            Total verified cash collected against processed invoices
+          </p>
+        </div>
+
+        {/* KPI 3: Outstanding Amount */}
+        <div className="rounded-md border border-hairline bg-canvas-elevated p-5 shadow-whisper">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[11px] uppercase tracking-wider text-mute">
+              Outstanding Amount
+            </span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-amber-500/10 text-amber-600">
+              <Clock className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-semibold tracking-tight text-ink">
+              {formatCurrency(kpis.outstandingAmountTotal)}
+            </span>
+            <span className="text-xs text-mute font-mono">unpaid</span>
+          </div>
+          <p className="mt-2 text-[11px] text-mute">
+            Total unpaid balances on issued invoices
+          </p>
+        </div>
+
+        {/* KPI 4: Overdue Invoices */}
+        <div className="rounded-md border border-hairline bg-canvas-elevated p-5 shadow-whisper">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[11px] uppercase tracking-wider text-mute">
+              Overdue Invoices
+            </span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-error/10 text-error">
+              <AlertTriangle className="h-4 w-4" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-3xl font-semibold tracking-tight text-error">
+              {kpis.overdueInvoicesCount}
+            </span>
+            <span className="text-xs text-error font-mono">
+              ({formatCurrency(kpis.overdueAmountTotal)})
+            </span>
+          </div>
+          <p className="mt-2 text-[11px] text-mute">
+            Invoices past due date requiring collection attention
+          </p>
+        </div>
+      </div>
+
+      {/* Operational Sections: Overdue Alerts & Upcoming Billing */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Overdue Invoices Requiring Attention */}
+        <div className="rounded-md border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+          <div className="flex items-center justify-between mb-4 border-b border-hairline-soft pb-3">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-error" />
+              <h2 className="text-sm font-semibold text-ink">
+                Overdue Invoices Requiring Attention
+              </h2>
+            </div>
+            <Link
+              href="/admin/invoices?filter=overdue"
+              className="text-xs font-mono text-link hover:underline"
+            >
+              View all ({kpis.overdueInvoicesCount})
+            </Link>
+          </div>
+
+          {kpis.overdueInvoices.length === 0 ? (
+            <div className="py-8 text-center text-xs text-mute">
+              <CheckCircle className="h-6 w-6 text-emerald-500 mx-auto mb-2" />
+              <span>All invoices are current. No overdue receivables.</span>
+            </div>
+          ) : (
+            <div className="divide-y divide-hairline-soft">
+              {kpis.overdueInvoices.map((inv) => (
+                <div
+                  key={inv.id}
+                  className="py-3 flex items-center justify-between gap-4"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/admin/invoices/${inv.id}`}
+                        className="text-xs font-semibold text-ink hover:text-link font-mono"
+                      >
+                        {inv.invoice_number}
+                      </Link>
+                      <span className="rounded-xs bg-error/10 px-1.5 py-0.2 text-[10px] font-mono text-error uppercase font-medium">
+                        Due {inv.due_date}
+                      </span>
+                    </div>
+                    <span className="text-xs text-mute block mt-0.5">
+                      {inv.customer?.company_name || inv.customer?.full_name}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-semibold text-error block">
+                      {formatCurrency(inv.amount_due)}
+                    </span>
+                    <Link
+                      href={`/admin/payments?invoiceId=${inv.id}`}
+                      className="text-[11px] text-link hover:underline block mt-0.5 font-mono"
+                    >
+                      Record payment →
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Upcoming Subscription Billing */}
+        <div className="rounded-md border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+          <div className="flex items-center justify-between mb-4 border-b border-hairline-soft pb-3">
+            <div className="flex items-center gap-2">
+              <Repeat className="h-4 w-4 text-ink" />
+              <h2 className="text-sm font-semibold text-ink">
+                Active Subscriptions Billing Schedule
+              </h2>
+            </div>
+            <Link
+              href="/admin/subscriptions"
+              className="text-xs font-mono text-link hover:underline"
+            >
+              Manage subs
+            </Link>
+          </div>
+
+          <div className="divide-y divide-hairline-soft">
+            {kpis.upcomingBillingSubscriptions.slice(0, 4).map((sub) => (
+              <div
+                key={sub.id}
+                className="py-3 flex items-center justify-between gap-4"
+              >
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/admin/subscriptions/${sub.id}`}
+                      className="text-xs font-semibold text-ink hover:text-link font-mono"
+                    >
+                      {sub.subscription_number}
+                    </Link>
+                    <span className="rounded-xs bg-canvas px-1.5 py-0.2 text-[10px] font-mono text-mute border border-hairline uppercase">
+                      {sub.billing_frequency}
+                    </span>
+                  </div>
+                  <span className="text-xs text-mute block mt-0.5">
+                    {sub.customer?.company_name || sub.customer?.full_name} · {sub.plan?.name}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-semibold text-ink block">
+                    {formatCurrency(sub.total_amount)}
+                  </span>
+                  <span className="text-[10px] font-mono text-mute block mt-0.5">
+                    Next: {sub.next_billing_date}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Subscriptions & Recent Payments */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Subscriptions */}
+        <div className="rounded-md border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+          <div className="flex items-center justify-between mb-4 border-b border-hairline-soft pb-3">
+            <h2 className="text-sm font-semibold text-ink">Recent Subscriptions</h2>
+            <Link
+              href="/admin/subscriptions"
+              className="text-xs font-mono text-link hover:underline"
+            >
+              View all
+            </Link>
+          </div>
+          <div className="divide-y divide-hairline-soft">
+            {kpis.recentSubscriptions.map((sub) => (
+              <div key={sub.id} className="py-2.5 flex items-center justify-between text-xs">
+                <div>
+                  <Link
+                    href={`/admin/subscriptions/${sub.id}`}
+                    className="font-mono font-medium text-ink hover:text-link"
+                  >
+                    {sub.subscription_number}
+                  </Link>
+                  <span className="text-mute block text-[11px]">
+                    {sub.customer?.full_name} · Started {sub.start_date}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-semibold text-ink">
+                    {formatCurrency(sub.total_amount)}
+                  </span>
+                  <span
+                    className={`rounded-xs px-2 py-0.5 font-mono text-[10px] uppercase font-medium ${
+                      sub.status === "active"
+                        ? "bg-emerald-500/10 text-emerald-600"
+                        : sub.status === "confirmed"
+                        ? "bg-blue-500/10 text-blue-600"
+                        : "bg-canvas text-mute border border-hairline"
+                    }`}
+                  >
+                    {sub.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Payments Received */}
+        <div className="rounded-md border border-hairline bg-canvas-elevated p-6 shadow-whisper">
+          <div className="flex items-center justify-between mb-4 border-b border-hairline-soft pb-3">
+            <h2 className="text-sm font-semibold text-ink">Recent Payments Received</h2>
+            <Link
+              href="/admin/payments"
+              className="text-xs font-mono text-link hover:underline"
+            >
+              View all
+            </Link>
+          </div>
+          <div className="divide-y divide-hairline-soft">
+            {kpis.recentPayments.map((p) => (
+              <div key={p.id} className="py-2.5 flex items-center justify-between text-xs">
+                <div>
+                  <span className="font-mono font-medium text-ink">
+                    {p.payment_reference}
+                  </span>
+                  <span className="text-mute block text-[11px]">
+                    {p.customer?.company_name || p.customer?.full_name} · {p.payment_date}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="font-semibold text-emerald-600 block">
+                    +{formatCurrency(p.amount)}
+                  </span>
+                  <span className="font-mono text-[10px] text-mute uppercase block">
+                    {p.payment_method.replace("_", " ")}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

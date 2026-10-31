@@ -104,7 +104,100 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 5: Phase 1 — Complete Admin Workspace (Brightloop Subscription Management System)
+- **Database Schema Migration (`supabase/migrations/20261031_002_admin_workspace_schema.sql`):**
+  - Designed and deployed comprehensive relational schema with strict foreign keys and cascading rules:
+    - `customers`: Company name, contact name, email, phone, billing address, tax identification number, and status.
+    - `products` & `product_variants`: Product catalog with type, sales price, cost price, notes, and attribute-based price-adjusting variants.
+    - `plans`: Recurring frequencies (`daily`, `weekly`, `monthly`, `yearly`), min quantity, availability dates, and lifecycle policy flags (`auto_close`, `early_close_eligible`, `pause_eligible`, `renew_eligible`).
+    - `taxes`: Tax rules with percentages and default rule identifier.
+    - `discounts`: Discount rules supporting `fixed` or `percentage`, min purchase, min quantity, validity windows, max usage limits, and application scopes.
+    - `quotation_templates` & `quotation_template_items`: Reusable sales configurations with default durations and bundled products.
+    - `quotations` & `quotation_items`: Draft, sent, approved, and converted quotations with locked-in pricing.
+    - `subscriptions` & `subscription_items`: Complete subscription state machine (`draft`, `quotation`, `confirmed`, `active`, `paused`, `closed`) with plan-governed action rules.
+    - `invoices` & `invoice_items`: Invoices (`draft`, `confirmed`, `paid`, `cancelled`) with composite unique constraint `(subscription_id, billing_period_start, billing_period_end)` guaranteeing billing run idempotency.
+    - `payments`: Immutable payment transaction records linked to invoices with automatic balance reduction.
+  - Enabled Row Level Security (RLS) across all operational tables with granular role checks for `admin`, `staff`, and `customer`.
+
+- **Domain Types & In-Memory Fallback Store (`src/types/admin.ts`, `src/lib/data/store.ts`):**
+  - Created complete TypeScript domain interfaces for every business entity.
+  - Built an enterprise-grade in-memory and Supabase-synced repository pattern with realistic seed data, calculation utilities, and business rule validators:
+    - Multi-entity cross-domain global search matching terms across customers, subscriptions, invoices, quotes, and products.
+    - Live KPI derivation:
+      - *Active Subscriptions*: count of subscriptions with status `active`.
+      - *Revenue Received*: strictly sum of completed payments (not billed totals).
+      - *Outstanding Amount*: total unpaid balance across confirmed and open invoices.
+      - *Overdue Invoices*: count of unpaid invoices where `due_date < current_date`.
+    - Business rule enforcement: Early close or pause operations are rejected if the linked plan has `early_close_eligible` or `pause_eligible` disabled.
+    - Billing run engine: Scans active subscriptions, calculates period dates, verifies idempotency constraint to avoid double billing, generates invoice records, and creates line item snapshots.
+    - Payment recording: Automatically deducts payment amounts from invoice balances and transitions invoice state to `paid` once balance reaches `0`.
+
+- **Modular Domain Action Handlers:**
+  - `src/modules/products/actions.ts`: Create and update products and variants.
+  - `src/modules/plans/actions.ts`: Create and update subscription plans and policy flags.
+  - `src/modules/taxes/actions.ts`: Create and update tax rules.
+  - `src/modules/discounts/actions.ts`: Create discount codes and validation rules.
+  - `src/modules/quotations/actions.ts`: Create quotation templates, draft quotations, and convert quotations to subscriptions with locked-in rates.
+  - `src/modules/subscriptions/actions.ts`: Create subscriptions, update lifecycle status with plan validation (pause, resume, renew, close).
+  - `src/modules/billing/actions.ts`: Execute automated billing run.
+  - `src/modules/invoices/actions.ts`: Invoice confirmation, payment status transitions, and cancellation.
+  - `src/modules/payments/actions.ts`: Record incoming payments against invoices and settle balances.
+  - `src/modules/team/actions.ts`: Provision new internal staff members.
+
+- **Admin Workspace Layout & UI Architecture:**
+  - `src/components/admin/admin-sidebar.tsx`: Grouped navigation covering Overview, Sales & Customers, Subscriptions, Catalog & Pricing, Finance, Management, and Account with active route styling.
+  - `src/components/admin/admin-header.tsx`: Header chrome with dynamic breadcrumbs, quick role badge, and interactive real-time global search dropdown modal.
+  - `src/components/admin/print-button.tsx`: Client-side print trigger for invoices.
+  - `src/app/(admin)/admin/layout.tsx`: Root admin layout providing consistent sidebar, header, and content canvas.
+
+- **Completed Admin UI Modules (All 35 Next.js Routes Compiled):**
+  - **Overview Dashboard (`/admin`):** 4 real-time KPI metrics, quick actions toolbar, recent subscriptions list, overdue invoices alert widget, and active system alerts.
+  - **Customers Directory & 360° Profile (`/admin/customers`, `/admin/customers/[id]`):** Searchable customer table with status filters, customer profile, and linked views of their active subscriptions, quotations, invoices, and payment receipts.
+  - **Product & Variant Catalog (`/admin/products`, `/admin/products/new`, `/admin/products/[id]`):** Catalog with sales price, cost price, margin calculation, and dynamic variant configurations (e.g., Odoo brand +$560 price adjustment).
+  - **Plan Management (`/admin/plans`, `/admin/plans/new`, `/admin/plans/[id]`):** Plan creator with daily/weekly/monthly/yearly frequencies, availability date ranges, min quantities, and policy toggles (auto-close, early-close, pause, renew).
+  - **Tax Management (`/admin/taxes`, `/admin/taxes/new`):** Tax rules table with percentages and default rule flag.
+  - **Discount Management (`/admin/discounts`, `/admin/discounts/new`):** Discount rule configuration with percentage/fixed types, min spend, usage limits, and product scope.
+  - **Quotation Templates (`/admin/quotation-templates`, `/admin/quotation-templates/new`):** Reusable quote templates with standard durations and preselected plans.
+  - **Quotations (`/admin/quotations`, `/admin/quotations/new`, `/admin/quotations/[id]`):** Quotation authoring, expiration validation, total calculations, and one-click conversion to confirmed subscriptions.
+  - **Subscription Lifecycle (`/admin/subscriptions`, `/admin/subscriptions/new`, `/admin/subscriptions/[id]`):** Comprehensive subscription management with line items, billing schedule, and plan-validated action buttons (Pause, Resume, Renew, Close).
+  - **Recurring Billing Engine (`/admin/billing`):** Administrative billing execution center with pending cycle detection, one-click billing run, and audit logs.
+  - **Invoices & Printable Document (`/admin/invoices`, `/admin/invoices/[id]`, `/admin/invoices/[id]/print`):** Full invoice details, payment reconciliation history, status updates, and print-optimized document view.
+  - **Payment Tracking (`/admin/payments`, `/admin/payments/new`):** Payment log with method, reference, and invoice balance settlement.
+  - **Financial & Operational Reports (`/admin/reports`):** Executive summary metrics, revenue breakdown by frequency and product, and accounts receivable aging buckets (Current, 1-30, 31-60, 60+ days).
+  - **Team Management (`/admin/team`, `/admin/team/new`):** Admin-only staff account provisioning.
+  - **Admin Account (`/admin/account`):** Profile settings and quick sign-out.
+
+- **Verification & Testing:**
+  - Executed `npm run build`: verified all 35 routes compile without TypeScript or bundle errors.
+  - Automated visual verification via Chrome DevTools MCP:
+    - Captured desktop screenshots (1440×900) across `/admin`, `/admin/customers`, `/admin/subscriptions`, and `/admin/invoices`.
+    - Captured mobile screenshot (390×844) validating responsive layout, cards, and navigation.
+  - Confirmed strict adherence to `DESIGN.md` (Geist tokens: `#fafafa` canvas, `#ffffff` card surfaces, `#171717` ink, `#ebebeb` borders, 6px rounded controls).
+
+---
+
 ## 3. Current Repository State
+
+- **Branch:** `main`
+- **Working Tree:**
+  - `src/app/(admin)/admin/`: Complete Phase 1 Admin Workspace (35 routes).
+  - `src/components/admin/`: Admin sidebar, header with global search, and print controls.
+  - `src/modules/`: Domain business logic actions (`products`, `plans`, `taxes`, `discounts`, `quotations`, `subscriptions`, `billing`, `invoices`, `payments`, `team`, `auth`).
+  - `src/lib/data/store.ts`: Domain models, seed data, calculation utilities, and business rule validators.
+  - `supabase/migrations/`: RBAC auth migration (`001`) and Complete Admin Workspace Schema migration (`002`).
+  - Documentation: `README.md`, `AGENTS.md`, `DESIGN.md`, `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_PLAN.md`, `whatisdone.md`.
+
+---
+
+## 4. Next Implementation Steps (Phase 2 of Hackathon: Staff & Customer Workspaces)
+
+1. **Internal Staff Workspace:**
+   - Dedicated role-restricted view for daily operational staff handling quotations, orders, invoices, and customer support without access to admin system settings (taxes, discounts, staff provisioning, high-level reports).
+2. **Customer Self-Service Portal:**
+   - Authenticated customer portal allowing subscribers to view their active subscriptions, download past invoices, update payment methods, and request plan changes.
+3. **End-to-End Integration & Deployment:**
+   - Supabase live database connection verification.
+   - Vercel deployment and health checks.
 
 - **Branch:** `main`
 - **Working Tree:**

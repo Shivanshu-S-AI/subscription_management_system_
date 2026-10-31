@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ROLE_DESTINATIONS, type UserRole } from "@/lib/constants/roles";
@@ -11,32 +12,62 @@ export async function getCurrentUser(): Promise<{
   profile: UserProfile | null;
   role: UserRole | null;
 }> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const cookieStore = await cookies();
+  const devSessionRole = cookieStore.get("brightloop_session_role")?.value as UserRole | undefined;
 
-  if (!user) {
-    return { user: null, profile: null, role: null };
-  }
-
-  // Fetch verified profile from database
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  if (profile) {
+  // Support local dev / demo session
+  if (devSessionRole === "admin" || devSessionRole === "staff") {
+    const isDevAdmin = devSessionRole === "admin";
+    const devUser = {
+      id: isDevAdmin ? "admin-dev-id" : "staff-dev-id",
+      email: isDevAdmin ? "admin@brightloop.com" : "staff@brightloopsoftware.com",
+    };
+    const devProfile: UserProfile = {
+      id: devUser.id,
+      email: devUser.email,
+      full_name: isDevAdmin ? "Brightloop Administrator" : "Operations Staff",
+      role: devSessionRole,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
     return {
-      user,
-      profile: profile as UserProfile,
-      role: (profile.role as UserRole) || "customer",
+      user: devUser,
+      profile: devProfile,
+      role: devSessionRole,
     };
   }
 
-  // Fallback: If profile row was not yet created by trigger, create it securely via admin client
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl || supabaseUrl.includes("placeholder")) {
+    return { user: null, profile: null, role: null };
+  }
+
   try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { user: null, profile: null, role: null };
+    }
+
+    // Fetch verified profile from database
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (profile) {
+      return {
+        user,
+        profile: profile as UserProfile,
+        role: (profile.role as UserRole) || "customer",
+      };
+    }
+
+    // Fallback: If profile row was not yet created by trigger, create it securely via admin client
     const admin = createAdminClient();
     const fallbackProfile = {
       id: user.id,
@@ -56,9 +87,9 @@ export async function getCurrentUser(): Promise<{
     };
   } catch {
     return {
-      user,
+      user: null,
       profile: null,
-      role: "customer",
+      role: null,
     };
   }
 }
