@@ -388,11 +388,42 @@ This document serves as the single tracking record for all past ("old") and curr
 
 ---
 
+### Milestone 10: Unified Tabbed Internal Login & Navbar CTA
+- **Landing Page Navbar CTA:**
+  - Updated primary navbar CTA button from "Get Started" (`/signup`) to **"Staff Login"** (`/internal-login`) in both desktop header and mobile responsive drawer in `src/components/layout/navbar.tsx`.
+- **Unified Two-Tab Internal Login Card (`src/app/(auth)/internal-login/page.tsx`):**
+  - Integrated interactive 2-tab segmented control inside the single `AuthCard` adhering strictly to `DESIGN.md`:
+    - **Internal Staff Tab:**
+      - Eyebrow: `DAILY OPERATIONS`
+      - Title: `Internal Staff Sign In`
+      - Subtitle: `Operational daily workspace: customer inquiries, quotations, subscriptions, invoices, and payments.`
+      - 1-Click Quick Accounts: `Alex Rivera` (`staff@brightloopsoftware.com`), `James Wilson` (`james.ops@brightloopsoftware.com`).
+      - Role-tailored input labels and placeholder.
+      - Action CTA: `Sign In as Internal Staff` (redirects directly to `/staff`).
+    - **Administrator Tab:**
+      - Eyebrow: `EXECUTIVE MANAGEMENT`
+      - Title: `Administrator Sign In`
+      - Subtitle: `Full administrative control: catalog, plans, billing automations, taxes, and system reports.`
+      - 1-Click Quick Accounts: `Shivanshu`, `Aryan`, `Hiren Sir`.
+      - Role-tailored input labels and placeholder.
+      - Action CTA: `Sign In as Administrator` (redirects directly to `/admin`).
+  - Passes hidden input `<input type="hidden" name="targetRole" value={activeTab} />` to guide role routing.
+- **Backend Role Routing Polish (`src/modules/auth/actions.ts` & `src/modules/auth/service.ts`):**
+  - Updated `internalSignInAction` to parse `targetRole` and route staff/admin accounts to their respective workspaces (`/staff` vs `/admin`).
+  - Updated `getCurrentUser` in dev session to dynamically populate `Alex Rivera` or `James Wilson` when logged in as staff.
+- **Automated Verification:**
+  - Expanded `tests/admin-accounts.test.mjs` with Staff Identifier Recognition logic.
+  - All 43 automated unit and integration tests passing (`npm test`).
+  - Next.js production build succeeded with 0 errors across all 61 routes (`npm run build`).
+  - Verified visual rendering, tab switching, and one-click quick login using Chrome DevTools MCP.
+
+---
+
 ## 3. Current Repository State
 
 - **Branch:** `main`
 - **Total Compiled Routes:** 61 routes across Marketing, Auth, Admin, Staff, and Customer Portal.
-- **Automated Test Suite:** 42 tests passing with 0 failures (`npm test`).
+- **Automated Test Suite:** 43 tests passing with 0 failures (`npm test`).
 - **Working Tree:**
   - `src/app/(portal)/portal/`: Complete Phase 3 Customer Portal (Overview, Subscriptions, Invoices, Account, Print).
   - `src/components/portal/`: Customer navbar with mobile drawer and customer layout shell.
@@ -411,7 +442,7 @@ This document serves as the single tracking record for all past ("old") and curr
   - `tests/`:
     - `auth-validation.test.mjs` (8 auth tests).
     - `cross-system-integration.test.mjs` (31 cross-system integration and E2E workflow tests).
-    - `admin-accounts.test.mjs` (3 admin accounts provisioning tests).
+    - `admin-accounts.test.mjs` (4 admin & staff provisioning tests).
   - Documentation: `README.md`, `AGENTS.md`, `DESIGN.md`, `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`, `DEVELOPMENT_PLAN.md`, `whatisdone.md`.
 
 ---

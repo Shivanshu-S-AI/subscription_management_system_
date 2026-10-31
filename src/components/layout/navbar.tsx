@@ -70,10 +70,10 @@ export function Navbar() {
             Log In
           </Link>
           <Link
-            href="/signup"
+            href="/internal-login"
             className="inline-flex h-8 items-center justify-center rounded-sm bg-ink px-3 text-xs font-medium text-white transition-colors hover:bg-black"
           >
-            Get Started
+            Staff Login
           </Link>
         </div>
 
@@ -130,11 +130,11 @@ export function Navbar() {
               Log In
             </Link>
             <Link
-              href="/signup"
+              href="/internal-login"
               onClick={() => setMobileMenuOpen(false)}
               className="flex h-9 w-full items-center justify-center rounded-sm bg-ink text-xs font-medium text-white"
             >
-              Get Started
+              Staff Login
             </Link>
           </div>
         </div>

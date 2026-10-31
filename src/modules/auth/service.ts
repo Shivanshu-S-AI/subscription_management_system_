@@ -25,6 +25,10 @@ export async function getCurrentUser(): Promise<{
     let adminEmail = "admin@brightloopsoftware.com";
     let adminId = "admin-dev-id";
 
+    let staffName = "Alex Rivera";
+    let staffEmail = "staff@brightloopsoftware.com";
+    let staffId = "staff-001";
+
     if (devSessionUser) {
       const u = devSessionUser.toLowerCase().trim();
       if (u === "shivanshu" || u.startsWith("shivanshu@")) {
@@ -39,15 +43,23 @@ export async function getCurrentUser(): Promise<{
         adminName = "Hiren Sir";
         adminEmail = "hiren@brightloopsoftware.com";
         adminId = "admin-hiren";
+      } else if (u === "james" || u.startsWith("james@") || u.includes("james")) {
+        staffName = "James Wilson";
+        staffEmail = "james.ops@brightloopsoftware.com";
+        staffId = "staff-002";
+      } else if (u === "alex" || u.startsWith("alex@") || u.startsWith("staff@")) {
+        staffName = "Alex Rivera";
+        staffEmail = "staff@brightloopsoftware.com";
+        staffId = "staff-001";
       }
     }
 
     const devUser = {
-      id: isDevAdmin ? adminId : isDevStaff ? "staff-dev-id" : "cust-001",
+      id: isDevAdmin ? adminId : isDevStaff ? staffId : "cust-001",
       email: isDevAdmin
         ? adminEmail
         : isDevStaff
-        ? "staff@brightloopsoftware.com"
+        ? staffEmail
         : "finance@apexcloud.io",
     };
     const devProfile: UserProfile = {
@@ -56,7 +68,7 @@ export async function getCurrentUser(): Promise<{
       full_name: isDevAdmin
         ? adminName
         : isDevStaff
-        ? "Operations Staff"
+        ? staffName
         : "Sarah Jenkins (Apex Cloud)",
       role: devSessionRole,
       created_at: new Date().toISOString(),

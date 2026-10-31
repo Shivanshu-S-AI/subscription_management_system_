@@ -170,6 +170,7 @@ export async function internalSignInAction(
   const identifier = (formData.get("identifier") as string)?.trim() || "";
   const password = (formData.get("password") as string) || "";
   const redirectTarget = (formData.get("redirect") as string) || "";
+  const targetRole = ((formData.get("targetRole") as string) || "admin") as "admin" | "staff";
 
   if (!identifier) {
     return { success: false, error: "Please enter your Account Identifier or Email." };
@@ -193,16 +194,27 @@ export async function internalSignInAction(
       lower === "hirensir" ||
       lower.startsWith("hiren@") ||
       lower.includes("admin");
-    const isStaffUser = lower.includes("staff") || lower === "alex" || lower === "james";
+    const isStaffUser =
+      lower.includes("staff") ||
+      lower === "alex" ||
+      lower.startsWith("alex@") ||
+      lower === "james" ||
+      lower.startsWith("james@");
 
-    if (isAdminUser || isStaffUser) {
-      const assignedRole: UserRole = isAdminUser ? "admin" : "staff";
-      const cookieStore = await cookies();
-      cookieStore.set("brightloop_session_role", assignedRole, { path: "/" });
-      cookieStore.set("brightloop_session_user", lower, { path: "/" });
-      const dest = redirectTarget || ROLE_DESTINATIONS[assignedRole];
-      redirect(dest);
+    let assignedRole: UserRole = "admin";
+    if (isAdminUser) {
+      assignedRole = "admin";
+    } else if (isStaffUser) {
+      assignedRole = "staff";
+    } else {
+      assignedRole = targetRole === "staff" ? "staff" : "admin";
     }
+
+    const cookieStore = await cookies();
+    cookieStore.set("brightloop_session_role", assignedRole, { path: "/" });
+    cookieStore.set("brightloop_session_user", lower, { path: "/" });
+    const dest = redirectTarget || (assignedRole === "staff" ? "/staff" : "/admin");
+    redirect(dest);
   }
 
   const email = identifier.includes("@")
@@ -244,7 +256,9 @@ export async function internalSignInAction(
     };
   }
 
-  const destination = redirectTarget || ROLE_DESTINATIONS[role];
+  const destination =
+    redirectTarget ||
+    (role === "admin" && targetRole === "staff" ? "/staff" : ROLE_DESTINATIONS[role]);
   redirect(destination);
 }
 

@@ -129,3 +129,4 @@ BEGIN
   SET role = 'admin', full_name = 'Hiren Sir', updated_at = timezone('utc'::text, now());
 
 END $$;
+

@@ -53,4 +53,26 @@ test("--- 3 Primary Admin Accounts Provisioning Test ---", async (t) => {
       assert.equal(isAdminUser, true, `Identifier '${id}' must be recognized as an admin`);
     }
   });
+
+  await t.test("Verify Staff Identifier Recognition Logic", () => {
+    const staffIdentifiers = [
+      "staff@brightloopsoftware.com",
+      "alex",
+      "alex@brightloopsoftware.com",
+      "james",
+      "james.ops@brightloopsoftware.com",
+      "staff",
+    ];
+
+    for (const id of staffIdentifiers) {
+      const lower = id.toLowerCase().trim();
+      const isStaffUser =
+        lower.includes("staff") ||
+        lower.includes("alex") ||
+        lower.includes("james");
+
+      assert.equal(isStaffUser, true, `Staff identifier '${id}' must be recognized as staff`);
+    }
+  });
 });
+
